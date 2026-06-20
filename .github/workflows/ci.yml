@@ -1,0 +1,25 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { path: seller-product-mfe }
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/seller-frontend-platform
+          path: seller-frontend-platform
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci && npm run build
+        working-directory: seller-frontend-platform
+      - run: npm ci
+        working-directory: seller-product-mfe
+      - run: npm run typecheck && npm test && npm run build
+        working-directory: seller-product-mfe
+      - run: node -e "const m=require('./dist/mf-manifest.json');if(!JSON.stringify(m).includes('./Routes'))process.exit(1)"
+        working-directory: seller-product-mfe

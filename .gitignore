@@ -1,0 +1,7 @@
+node_modules/
+dist/
+@mf-types/
+*.tsbuildinfo
+.mf/
+coverage/
+.DS_Store

@@ -1,0 +1,16 @@
+
+import { useQuery } from "@tanstack/react-query";
+import { catalogService } from "@/features/products/api";
+import type { HateoasLink } from "@grab/seller-api";
+import type { CategoryLeavesResult } from "@/features/products/types";
+import { resolveUrlTemplate } from "@grab/seller-api";
+
+export function useCategoryLeaveSearch(categoriesLink: HateoasLink, search: string) {
+  const expendLink = resolveUrlTemplate({ "name": search }, categoriesLink)
+  return useQuery<CategoryLeavesResult, Error>({
+    queryKey: ["categories", expendLink, search],
+    queryFn: async () => catalogService.getCategories(expendLink),
+    enabled: !!categoriesLink && !!search?.trim(),
+    staleTime: 1000 * 60 * 5,
+  });
+}
