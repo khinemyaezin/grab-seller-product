@@ -6,17 +6,18 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with: { path: seller-product-mfe }
-      - uses: actions/checkout@v4
-        with:
-          repository: ${{ github.repository_owner }}/seller-frontend-platform
-          path: seller-frontend-platform
       - uses: actions/setup-node@v4
-        with: { node-version: 22 }
-      - run: npm ci && npm run build
-        working-directory: seller-frontend-platform
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          scope: '@grab'
+          cache: npm
+          cache-dependency-path: seller-product-mfe/package-lock.json
       - run: npm ci
         working-directory: seller-product-mfe
       - run: npm run typecheck && npm test && npm run build

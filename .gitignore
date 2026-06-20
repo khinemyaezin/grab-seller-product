@@ -5,3 +5,4 @@ dist/
 .mf/
 coverage/
 .DS_Store
+.npmrc
