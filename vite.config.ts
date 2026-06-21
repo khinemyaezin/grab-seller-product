@@ -4,7 +4,7 @@ import react from "@vitejs/plugin-react";
 import { federation } from "@module-federation/vite";
 
 export default defineConfig(({ mode }) => ({
-  base: mode === "development" ? "/" : "/mfe/product/",
+  base: mode === "development" ? "/" : "/mfe/grab-seller-product/",
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
   plugins: [
     react(),
