@@ -45,7 +45,7 @@ export default function ProductsView({ link, canCreate }: ProductsViewProps) {
         <CardAction>
           {canCreate && (
             <Button>
-              <Link to={routes.admin.newProduct}>Add product</Link>
+              <Link to={routes.newProduct}>Add product</Link>
             </Button>
           )}
         </CardAction>

@@ -95,9 +95,9 @@ export default function ProductTable({ link, filter, onPageChange }: ProductTabl
                   <DropdownMenuContent>
                     <DropdownMenuGroup>
                       {hasLink(product._links, "update-product") && (
-                      <DropdownMenuItem asChild>
-                        <Link to={routes.admin.editProduct(product.productId)}>Edit</Link>
-                      </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to={routes.editProduct(product.productId)}>Edit</Link>
+                        </DropdownMenuItem>
                       )}
 
                     </DropdownMenuGroup>
