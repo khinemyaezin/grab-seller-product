@@ -20,7 +20,7 @@ export default function EditProductPage() {
       >
         <ButtonGroup>
           <Button type="button" variant="secondary">
-            <Link to={routes.admin.products} className="flex gap-2 items-center">
+            <Link to={routes.products} className="flex gap-2 items-center">
               <ArrowLeftIcon />
               <span>Back to Products</span>
             </Link>
