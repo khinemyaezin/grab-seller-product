@@ -1,18 +1,18 @@
 FROM node:22-alpine AS platform
-WORKDIR /workspace/seller-frontend-platform
-COPY seller-frontend-platform/package*.json seller-frontend-platform/tsconfig.base.json ./
-COPY seller-frontend-platform/packages ./packages
+WORKDIR /workspace/grab-seller-shared-ui
+COPY grab-seller-shared-ui/package*.json grab-seller-shared-ui/tsconfig.base.json ./
+COPY grab-seller-shared-ui/packages ./packages
 RUN npm ci && npm run build
 
 FROM node:22-alpine AS builder
-WORKDIR /workspace/seller-product-mfe
-COPY seller-product-mfe/package*.json ./
-COPY --from=platform /workspace/seller-frontend-platform /workspace/seller-frontend-platform
+WORKDIR /workspace/grab-seller-product
+COPY  grab-seller-product/package*.json ./
+COPY --from=platform /workspace/grab-seller-shared-ui /workspace/grab-seller-shared-ui
 RUN npm ci
-COPY seller-product-mfe/ ./
+COPY grab-seller-product/ ./
 RUN npm run build
 
 FROM nginx:1.29-alpine
-COPY seller-product-mfe/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=builder /workspace/seller-product-mfe/dist /usr/share/nginx/html
+COPY grab-seller-product/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /workspace/grab-seller-product/dist /usr/share/nginx/html
 EXPOSE 80

@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     federation({
-      name: "seller_product",
+      name: "grab_seller_product",
       filename: "remoteEntry.js",
       manifest: true,
       dts: {
