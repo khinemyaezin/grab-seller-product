@@ -10,17 +10,17 @@ jobs:
       NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - uses: actions/checkout@v4
-        with: { path: seller-product-mfe }
+        with: { path: grab-seller-product }
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
           scope: '@grab'
           cache: npm
-          cache-dependency-path: seller-product-mfe/package-lock.json
+          cache-dependency-path: grab-seller-product/package-lock.json
       - run: npm ci
-        working-directory: seller-product-mfe
+        working-directory: grab-seller-product
       - run: npm run typecheck && npm test && npm run build
-        working-directory: seller-product-mfe
+        working-directory: grab-seller-product
       - run: node -e "const m=require('./dist/mf-manifest.json');if(!JSON.stringify(m).includes('./Routes'))process.exit(1)"
-        working-directory: seller-product-mfe
+        working-directory: grab-seller-product

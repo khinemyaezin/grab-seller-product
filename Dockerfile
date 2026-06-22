@@ -1,18 +1,24 @@
-FROM node:22-alpine AS platform
-WORKDIR /workspace/seller-frontend-platform
-COPY seller-frontend-platform/package*.json seller-frontend-platform/tsconfig.base.json ./
-COPY seller-frontend-platform/packages ./packages
-RUN npm ci && npm run build
+FROM node:22-alpine AS build
 
-FROM node:22-alpine AS builder
-WORKDIR /workspace/seller-product-mfe
-COPY seller-product-mfe/package*.json ./
-COPY --from=platform /workspace/seller-frontend-platform /workspace/seller-frontend-platform
-RUN npm ci
-COPY seller-product-mfe/ ./
-RUN npm run build
+WORKDIR /workspace
 
-FROM nginx:1.29-alpine
-COPY seller-product-mfe/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=builder /workspace/seller-product-mfe/dist /usr/share/nginx/html
+COPY grab-seller-shared-ui ./grab-seller-shared-ui
+RUN cd grab-seller-shared-ui \
+    && npm ci \
+    && npm run build
+
+COPY grab-seller-product ./grab-seller-product
+RUN cd grab-seller-product \
+    && npm ci \
+    && npm run build
+
+FROM nginx:1.27-alpine AS runtime
+
+COPY grab-seller-product/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /workspace/grab-seller-product/dist /usr/share/nginx/html
+
 EXPOSE 80
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget -q --spider http://127.0.0.1/mf-manifest.json || exit 1
+

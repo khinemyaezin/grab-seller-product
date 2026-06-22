@@ -7,12 +7,12 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
   return {
-    base: mode === "development" ? "/" : "/mfe/product/",
+    base: mode === "development" ? "/" : "/mfe/grab-seller-product/",
     resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
     plugins: [
       react(),
       federation({
-        name: "seller_product",
+        name: "grab_seller_product",
         filename: "remoteEntry.js",
         manifest: true,
         dts: {

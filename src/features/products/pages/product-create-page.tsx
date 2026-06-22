@@ -19,7 +19,7 @@ export default function NewProductPage() {
             >
                 <ButtonGroup>
                     <Button type="button" variant="secondary">
-                        <Link to={routes.admin.products} className="flex gap-2 items-center">
+                        <Link to={routes.products} className="flex gap-2 items-center">
                             <ArrowLeftIcon />
                             <span>Back to Products</span>
                         </Link>
@@ -32,7 +32,7 @@ export default function NewProductPage() {
                     generateMatrixLink={data.generateVariationMatrix}
                     variationTypeSearchLink={data.searchVariantTypes}
                     variationOptionSearchLink={data.searchVariantOptions}
-                    categorySearchLink={data.searchCategoryLeaves} 
+                    categorySearchLink={data.searchCategoryLeaves}
                     createProductLink={data.createProduct} />
             )}
         </div>
