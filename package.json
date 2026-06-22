@@ -11,9 +11,9 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@grab/seller-api": "0.1.0",
-    "@grab/seller-contracts": "0.1.0",
-    "@grab/seller-ui": "0.1.0",
+    "@grab/seller-api": "file:../grab-seller-shared-ui/packages/seller-api",
+    "@grab/seller-contracts": "file:../grab-seller-shared-ui/packages/seller-contracts",
+    "@grab/seller-ui": "file:../grab-seller-shared-ui/packages/seller-ui",
     "@hookform/resolvers": "5.2.2",
     "@tanstack/react-query": "5.99.2",
     "lodash": "4.18.1",
@@ -45,5 +45,7 @@
     "vite": "8.0.16",
     "vitest": "4.1.9"
   },
-  "engines": { "node": ">=20.19.0" }
+  "engines": {
+    "node": ">=20.19.0"
+  }
 }

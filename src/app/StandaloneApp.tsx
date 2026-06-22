@@ -4,6 +4,11 @@ import { BrowserRouter, Route, Routes, Navigate } from "react-router";
 import { ThemeProvider, Toaster } from "@grab/seller-ui";
 import { defaultRuntimeConfig } from "@grab/seller-contracts";
 import ProductRoutes from "./ProductRoutes";
+import { configureApi } from "@grab/seller-api";
+
+configureApi({ 
+  baseUrl: "/api/v1"
+ });
 
 export default function StandaloneApp() {
   const [client] = useState(() => new QueryClient());
