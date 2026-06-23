@@ -1,7 +1,7 @@
 
-import { Button } from "@grab/seller-ui/components/index"
-import { ButtonGroup } from "@grab/seller-ui/components/button-group"
-import { Card, CardContent, CardFooter } from "@grab/seller-ui/components/card"
+import { Button } from "@khinemyaezin/seller-ui/components/index"
+import { ButtonGroup } from "@khinemyaezin/seller-ui/components/button-group"
+import { Card, CardContent, CardFooter } from "@khinemyaezin/seller-ui/components/card"
 import { FormProvider, useForm, useWatch } from "react-hook-form"
 import ProductBasicFieldSet from "./product-basic-fieldset"
 import ProductVariationFieldSet from "./product-variation-fieldset"
@@ -13,8 +13,8 @@ import { ApiError } from "@/features/products/api"
 import { isEqual } from "lodash"
 import { useMemo, useEffect } from "react"
 import { toast } from "sonner"
-import { Separator } from "@grab/seller-ui/components/separator"
-import { resolveLink } from "@grab/seller-api"
+import { Separator } from "@khinemyaezin/seller-ui/components/separator"
+import { resolveLink } from "@khinemyaezin/seller-api"
 
 export type ProductEditFormProps = {
     generateMatrixLink: HateoasLink,
@@ -158,7 +158,7 @@ export default function ProductEditForm({
         defaultValues: DEFAULT_PRODUCT_FORM_VALUE,
         mode: "onSubmit",
     });
-    const { handleSubmit, control, reset, getFieldState } = form;
+    const { handleSubmit, control, reset, getFieldState, formState: { isDirty } } = form;
     const { data: productData, isLoading: isProductLoading } = useProductGet(getProductLink, productId);
     const productUpdateLink = resolveLink(productData?._links, "update-product");
     const updateProductMutation = useProductUpdateMutation();

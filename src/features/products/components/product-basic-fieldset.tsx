@@ -1,6 +1,6 @@
 
-import { Input } from "@grab/seller-ui/components/index";
-import { FieldGroup, Field, FieldLabel, FieldError, FieldSet, FieldLegend, FieldDescription } from "@grab/seller-ui/components/field";
+import { Input } from "@khinemyaezin/seller-ui/components/index";
+import { FieldGroup, Field, FieldLabel, FieldError, FieldSet, FieldLegend, FieldDescription } from "@khinemyaezin/seller-ui/components/field";
 import { HateoasLink, ProductFormValue } from "@/types";
 import { useFormContext, Controller } from "react-hook-form";
 import CategorySearch from "./category-search";

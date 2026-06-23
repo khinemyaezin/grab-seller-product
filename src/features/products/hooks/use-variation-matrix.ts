@@ -1,6 +1,6 @@
 
 import { catalogService } from "@/features/products/api";
-import type { HateoasLink } from "@grab/seller-api";
+import type { HateoasLink } from "@khinemyaezin/seller-api";
 import type { VariationMatrixRequest, VariationMatrixResponse } from "@/features/products/types";
 import { useMutation } from "@tanstack/react-query";
 

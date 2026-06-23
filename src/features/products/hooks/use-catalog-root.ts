@@ -1,16 +1,16 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { useApiRoot } from "./use-api-root";
 import { fetchCatalogRoot } from "../api/discovery";
 import type { CatalogRoot } from "@/features/products/types";
+import { useProductLink } from "../context";
 
 export function useCatalogRoot() {
-  const { data: apiRoot } = useApiRoot();
-
+   const link = useProductLink();
+  
   return useQuery<CatalogRoot>({
-    queryKey: ["catalog-root", apiRoot?.catalog?.href],
-    queryFn: () => fetchCatalogRoot(apiRoot!.catalog!),
-    enabled: !!apiRoot?.catalog,
+    queryKey: ["catalog-root", link.href],
+    queryFn: () => fetchCatalogRoot(link),
+    enabled: !!link,
     staleTime: Infinity,
   });
 }

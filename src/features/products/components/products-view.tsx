@@ -1,11 +1,11 @@
 
 import { Link } from "react-router";
 import { useCallback, useState } from "react";
-import { routes } from "@grab/seller-contracts";
-import { HateoasLink } from "@grab/seller-api";
+import { routes } from "@khinemyaezin/seller-contracts";
+import { HateoasLink } from "@khinemyaezin/seller-api";
 import { ProductFilterFormValue } from "@/features/products/types";
-import { Button } from "@grab/seller-ui/components/button";
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@grab/seller-ui/components/card";
+import { Button } from "@khinemyaezin/seller-ui/components/button";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@khinemyaezin/seller-ui/components/card";
 import ProductTable from "./product-table";
 import ProductsFilter from "./products-filter";
 

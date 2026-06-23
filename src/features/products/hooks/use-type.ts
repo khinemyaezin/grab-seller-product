@@ -1,8 +1,8 @@
 import { catalogService } from "@/features/products/api";
-import type { HateoasLink } from "@grab/seller-api";
+import type { HateoasLink } from "@khinemyaezin/seller-api";
 import { GetVariationTypeResult } from "@/features/products/types";
 import { useQuery } from "@tanstack/react-query";
-import { resolveUrlTemplate } from "@grab/seller-api";
+import { resolveUrlTemplate } from "@khinemyaezin/seller-api";
 
 export function useVariationType(variantTypesLink: HateoasLink, name: string) {
   const expendLink = resolveUrlTemplate({ "name": name }, variantTypesLink);

@@ -1,8 +1,8 @@
-import { FieldDescription, FieldGroup, FieldLegend, FieldSet } from "@grab/seller-ui/components/field";
+import { FieldDescription, FieldGroup, FieldLegend, FieldSet } from "@khinemyaezin/seller-ui/components/field";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { VariantTable } from "./variant-table";
 import { Plus } from "lucide-react";
-import { Item, ItemActions, ItemContent, ItemTitle } from "@grab/seller-ui/components/item";
+import { Item, ItemActions, ItemContent, ItemTitle } from "@khinemyaezin/seller-ui/components/item";
 import { useMatrixSync } from "@/features/products/hooks/use-matrix-sync";
 import type { ProductFormValue } from "@/features/products/types";
 import ProductStandaloneVariantField from "./product-standalone-field";
