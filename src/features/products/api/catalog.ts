@@ -11,8 +11,8 @@ import type {
   VariationMatrixRequest,
   VariationMatrixResponse,
 } from "@/features/products/types";
-import { api } from "@grab/seller-api";
-import type { HateoasLink } from "@grab/seller-api";
+import { api } from "@khinemyaezin/seller-api";
+import type { HateoasLink } from "@khinemyaezin/seller-api";
 
 export const catalogService = {
   createVariationMatrix: (link: HateoasLink, request: VariationMatrixRequest, headers?: Record<string, string>) =>

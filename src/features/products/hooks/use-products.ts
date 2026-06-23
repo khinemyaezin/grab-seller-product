@@ -1,9 +1,9 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { catalogService } from "@/features/products/api";
-import type { HateoasLink } from "@grab/seller-api";
+import type { HateoasLink } from "@khinemyaezin/seller-api";
 import type { CreateProductRequest, GetFullProductResponse, GetFeaturedProductRequest, GetFeaturedProductResponse, UpdateProductRequest, UpdateProductResponse } from "@/features/products/types";
-import { resolveUrlTemplate } from "@grab/seller-api";
+import { resolveUrlTemplate } from "@khinemyaezin/seller-api";
 
 export function useProductMutation() {
   return useMutation<void, Error, { link: HateoasLink, request: CreateProductRequest }>({

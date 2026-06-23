@@ -1,5 +1,5 @@
 
-import { Header } from "@grab/seller-ui/layout/header";
+import { Header } from "@khinemyaezin/seller-ui/layout/header";
 import { useCatalogRoot } from "@/features/products/hooks/use-catalog-root";
 import ProductsView from "@/features/products/components/products-view";
 

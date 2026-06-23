@@ -4,11 +4,11 @@ import { useVariationOptionSearch } from "@/features/products/hooks/use-option";
 import { useController, UseControllerProps, UseFormGetValues } from "react-hook-form";
 import { SearchIcon, Trash } from "lucide-react";
 import { useState } from "react";
-import { DisplayItem, MagicSearch } from "@grab/seller-ui/components/magic-search";
-import { Button } from "@grab/seller-ui/components/index";
-import { ButtonGroup } from "@grab/seller-ui/components/button-group";
-import { Field, FieldError } from "@grab/seller-ui/components/field";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@grab/seller-ui/components/input-group";
+import { DisplayItem, MagicSearch } from "@khinemyaezin/seller-ui/components/magic-search";
+import { Button } from "@khinemyaezin/seller-ui/components/index";
+import { ButtonGroup } from "@khinemyaezin/seller-ui/components/button-group";
+import { Field, FieldError } from "@khinemyaezin/seller-ui/components/field";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@khinemyaezin/seller-ui/components/input-group";
 import { HateoasLink } from "@/types";
 
 interface VariationOptionItemProps {

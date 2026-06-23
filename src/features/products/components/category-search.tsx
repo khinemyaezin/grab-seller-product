@@ -1,8 +1,8 @@
 
 import { useCategoryLeaveSearch } from "@/features/products/hooks/use-categories";
 import { Category } from "@/features/products/types";
-import { MagicSearch, DisplayItem } from "@grab/seller-ui/components/magic-search";
-import { Input } from "@grab/seller-ui/components/input";
+import { MagicSearch, DisplayItem } from "@khinemyaezin/seller-ui/components/magic-search";
+import { Input } from "@khinemyaezin/seller-ui/components/input";
 import { SearchIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ComponentPropsWithoutRef } from 'react';

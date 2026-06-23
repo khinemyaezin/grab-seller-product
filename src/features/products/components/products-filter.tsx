@@ -10,7 +10,7 @@ import {
   InputGroupButton,
   InputGroupInput,
   InputGroupText,
-} from "@grab/seller-ui/components/input-group";
+} from "@khinemyaezin/seller-ui/components/input-group";
 import {
   Select,
   SelectContent,
@@ -18,7 +18,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@grab/seller-ui/components/select";
+} from "@khinemyaezin/seller-ui/components/select";
 
 export type ProductsFilterProps = {
   value: ProductFilterFormValue;

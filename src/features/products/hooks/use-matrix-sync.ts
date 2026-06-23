@@ -25,14 +25,14 @@ export function useMatrixSync(link: HateoasLink) {
 
         const hasValidOptions = request.variantTypes.some((t) => t.options.length > 0);
         if (!hasValidOptions) {
-            setValue("product.variants", []);
+            setValue("product.variants", [], { shouldDirty: true });
             return;
         }
 
         try {
             const res = await generateMatrix.mutateAsync(request);
             const next = responseToVariant(res, variants, types);
-            setValue("product.variants", next);
+            setValue("product.variants", next, { shouldDirty: true });
         } catch {
 
         }

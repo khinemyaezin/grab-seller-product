@@ -1,11 +1,11 @@
 
 import { Link, useParams } from "react-router";
 import { ArrowLeftIcon } from "lucide-react";
-import { ButtonGroup } from "@grab/seller-ui/components/button-group";
-import { Button } from "@grab/seller-ui/components/button";
-import { Header } from "@grab/seller-ui/layout/header";
+import { ButtonGroup } from "@khinemyaezin/seller-ui/components/button-group";
+import { Button } from "@khinemyaezin/seller-ui/components/button";
+import { Header } from "@khinemyaezin/seller-ui/layout/header";
 import { useCatalogRoot } from "@/features/products/hooks/use-catalog-root";
-import { routes } from "@grab/seller-contracts";
+import { routes } from "@khinemyaezin/seller-contracts";
 import ProductEditForm from "@/features/products/components/product-edit-form";
 
 export default function EditProductPage() {

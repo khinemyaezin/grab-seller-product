@@ -1,9 +1,9 @@
 
 import ProductNewForm from "@/features/products/components/product-new-form";
-import { Header } from "@grab/seller-ui/layout/header";
-import { Button } from "@grab/seller-ui/components/index";
-import { ButtonGroup } from "@grab/seller-ui/components/button-group";
-import { routes } from "@grab/seller-contracts";
+import { Header } from "@khinemyaezin/seller-ui/layout/header";
+import { Button } from "@khinemyaezin/seller-ui/components/index";
+import { ButtonGroup } from "@khinemyaezin/seller-ui/components/button-group";
+import { routes } from "@khinemyaezin/seller-contracts";
 import { useCatalogRoot } from "@/features/products/hooks/use-catalog-root";
 import { ArrowLeftIcon } from "lucide-react";
 import { Link } from "react-router";

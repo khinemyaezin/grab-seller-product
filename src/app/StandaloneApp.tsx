@@ -1,14 +1,8 @@
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router";
-import { ThemeProvider, Toaster } from "@grab/seller-ui";
-import { defaultRuntimeConfig } from "@grab/seller-contracts";
+import { ThemeProvider, Toaster } from "@khinemyaezin/seller-ui";
 import ProductRoutes from "./ProductRoutes";
-import { configureApi } from "@grab/seller-api";
-
-configureApi({ 
-  baseUrl: "/api/v1"
- });
 
 export default function StandaloneApp() {
   const [client] = useState(() => new QueryClient());
@@ -20,7 +14,9 @@ export default function StandaloneApp() {
             <Toaster />
             <Routes>
               <Route path="/" element={<Navigate to="/dashboard/products" replace />} />
-              <Route path="/dashboard/products/*" element={<ProductRoutes/>} />
+              <Route path="/dashboard/products/*" element={
+                <ProductRoutes link={{href: import.meta.env.VITE_CATALOG_API_URL}} />
+                } />
             </Routes>
           </main>
         </BrowserRouter>

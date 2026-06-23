@@ -8,3 +8,4 @@ coverage/
 .npmrc
 .env
 .vscode
+package-lock.json

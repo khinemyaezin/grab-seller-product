@@ -1,4 +1,4 @@
-import { api, resolveLink, type HalLinks, type HateoasLink } from "@grab/seller-api";
+import { api, resolveLink, type HalLinks, type HateoasLink } from "@khinemyaezin/seller-api";
 import type { CatalogRoot } from "../types";
 
 type RootResponse = { _links: HalLinks };

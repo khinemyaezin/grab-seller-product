@@ -1,12 +1,12 @@
 
 import { Link } from "react-router";
 import { useEffect, useMemo, useState } from "react";
-import { routes } from "@grab/seller-contracts";
+import { routes } from "@khinemyaezin/seller-contracts";
 import { useProductSearch } from "@/features/products/hooks/use-products";
-import { HateoasLink } from "@grab/seller-api";
+import { HateoasLink } from "@khinemyaezin/seller-api";
 import { GetFeaturedProductResponse, ProductFilterFormValue } from "@/features/products/types";
-import { PageInfo } from "@grab/seller-api";
-import { Pager } from "@grab/seller-ui/components/pager";
+import { PageInfo } from "@khinemyaezin/seller-api";
+import { Pager } from "@khinemyaezin/seller-ui/components/pager";
 import {
   Table,
   TableBody,
@@ -15,10 +15,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@grab/seller-ui/components/table";
-import { Button } from "@grab/seller-ui/components/index";
-import { DropdownMenuTrigger, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenu } from "@grab/seller-ui/components/dropdown-menu";
-import { hasLink } from "@grab/seller-api";
+} from "@khinemyaezin/seller-ui/components/table";
+import { Button } from "@khinemyaezin/seller-ui/components/index";
+import { DropdownMenuTrigger, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenu } from "@khinemyaezin/seller-ui/components/dropdown-menu";
+import { hasLink } from "@khinemyaezin/seller-api";
 import { Ellipsis } from "lucide-react";
 
 const DEFAULT_PAGE_INFO: PageInfo = {

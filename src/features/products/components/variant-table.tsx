@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { Input } from "@grab/seller-ui/components/input";
-import { Button } from "@grab/seller-ui/components/button";
+import { Input } from "@khinemyaezin/seller-ui/components/input";
+import { Button } from "@khinemyaezin/seller-ui/components/button";
 import {
   Table,
   TableBody,
@@ -9,10 +9,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@grab/seller-ui/components/table";
+} from "@khinemyaezin/seller-ui/components/table";
 import { Controller, useFieldArray, useFormContext } from "react-hook-form";
-import { Checkbox } from "@grab/seller-ui/components/checkbox";
-import { Field, FieldError } from "@grab/seller-ui/components/field";
+import { Checkbox } from "@khinemyaezin/seller-ui/components/checkbox";
+import { Field, FieldError } from "@khinemyaezin/seller-ui/components/field";
 import type { ProductFormValue } from "@/features/products/types";
 
 type VariantTableProps = {

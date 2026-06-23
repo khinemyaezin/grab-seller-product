@@ -4,11 +4,11 @@ import ProductBasicFieldSet from "./product-basic-fieldset";
 import ProductVariationFieldSet from "./product-variation-fieldset";
 import { generateSlug } from "@/features/products/utils";
 import { useProductMutation } from "@/features/products/hooks/use-products";
-import { Card, CardContent, CardFooter } from "@grab/seller-ui/components/card";
-import { FieldSeparator } from "@grab/seller-ui/components/field";
-import { Separator } from "@grab/seller-ui/components/separator";
-import { Button } from "@grab/seller-ui/components/index";
-import { ButtonGroup } from "@grab/seller-ui/components/button-group";
+import { Card, CardContent, CardFooter } from "@khinemyaezin/seller-ui/components/card";
+import { FieldSeparator } from "@khinemyaezin/seller-ui/components/field";
+import { Separator } from "@khinemyaezin/seller-ui/components/separator";
+import { Button } from "@khinemyaezin/seller-ui/components/index";
+import { ButtonGroup } from "@khinemyaezin/seller-ui/components/button-group";
 
 export type ProductNewFormProps = {
     generateMatrixLink: HateoasLink,
