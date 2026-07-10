@@ -1,13 +1,13 @@
 
 import { Header } from "@khinemyaezin/seller-ui/layout/header";
-import { useCatalogRoot } from "@/features/products/hooks/use-catalog-root";
+import { useRoot } from "@/features/products/hooks/use-root";
 import ProductsView from "@/features/products/components/products-view";
 
 export default function AdminProductsPage() {
-  const { data: catalogRoot } = useCatalogRoot();
+  const { data: catalogRoot } = useRoot();
 
   return (
-    <div className="container mx-auto max-w-5xl">
+    <div className="container mx-auto max-w-5xl p-6">
       <Header
         title="Products"
         description="Manage your product catalog, update stock status, and add new inventory.">

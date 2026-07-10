@@ -38,6 +38,8 @@ export type {
   CategoryLeavesResult,
   GetVariationTypeResult,
   GetVariationOptionResult,
+  ProductModerationResponse,
+  DeleteProductResponse
 } from "./catalog.response";
 
 // Form Values

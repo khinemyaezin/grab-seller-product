@@ -1,9 +1,10 @@
 
 import { Input } from "@khinemyaezin/seller-ui/components/index";
 import { FieldGroup, Field, FieldLabel, FieldError, FieldSet, FieldLegend, FieldDescription } from "@khinemyaezin/seller-ui/components/field";
-import { HateoasLink, ProductFormValue } from "@/types";
 import { useFormContext, Controller } from "react-hook-form";
 import CategorySearch from "./category-search";
+import { HateoasLink } from "@khinemyaezin/seller-api";
+import { ProductFormValue } from "../types";
 
 export type ProductBasicFieldSetProps = {
     searchCategoryLink: HateoasLink

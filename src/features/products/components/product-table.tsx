@@ -1,8 +1,8 @@
 
 import { Link } from "react-router";
-import { useEffect, useMemo, useState } from "react";
-import { routes } from "@khinemyaezin/seller-contracts";
-import { useProductSearch } from "@/features/products/hooks/use-products";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useProductSearch, useProductDeleteMutation } from "@/features/products/hooks/use-products";
+import { usePlatform } from "@khinemyaezin/seller-ui";
 import { HateoasLink } from "@khinemyaezin/seller-api";
 import { GetFeaturedProductResponse, ProductFilterFormValue } from "@/features/products/types";
 import { PageInfo } from "@khinemyaezin/seller-api";
@@ -16,9 +16,9 @@ import {
   TableHeader,
   TableRow,
 } from "@khinemyaezin/seller-ui/components/table";
-import { Button } from "@khinemyaezin/seller-ui/components/index";
+import { Badge, Button } from "@khinemyaezin/seller-ui/components/index";
 import { DropdownMenuTrigger, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenu } from "@khinemyaezin/seller-ui/components/dropdown-menu";
-import { hasLink } from "@khinemyaezin/seller-api";
+import { hasLink, resolveLink } from "@khinemyaezin/seller-api";
 import { Ellipsis } from "lucide-react";
 
 const DEFAULT_PAGE_INFO: PageInfo = {
@@ -56,8 +56,25 @@ function transformToProducts(data?: GetFeaturedProductResponse): FeatureProduct[
 
 export default function ProductTable({ link, filter, onPageChange }: ProductTableProps) {
   const { data } = useProductSearch(link, filter);
+  const platform = usePlatform();
+  const deleteProductMutation = useProductDeleteMutation();
   const [showPagination, setShowPagination] = useState<boolean>(false);
   const products = useMemo(() => transformToProducts(data), [data]);
+
+  const handleArchive = useCallback(
+    (deleteLink: HateoasLink, name: string) => {
+      deleteProductMutation.mutate(
+        { link: deleteLink },
+        {
+          onSuccess: () =>
+            platform?.events.publish("shell:toast:v1", { type: "success", message: `${name} archived`, position: "top-center" }),
+          onError: () =>
+            platform?.events.publish("shell:toast:v1", { type: "error", message: `Failed to archive ${name}`, position: "top-center" }),
+        },
+      );
+    },
+    [deleteProductMutation, platform],
+  );
 
   useEffect(() => {
     if (data) {
@@ -83,7 +100,7 @@ export default function ProductTable({ link, filter, onPageChange }: ProductTabl
                 {product.name}
               </TableCell>
               <TableCell>{product.categoryName}</TableCell>
-              <TableCell>{product.status}</TableCell>
+              <TableCell><Badge variant="secondary">{product.status}</Badge></TableCell>
               <TableCell>
 
                 <DropdownMenu>
@@ -96,7 +113,15 @@ export default function ProductTable({ link, filter, onPageChange }: ProductTabl
                     <DropdownMenuGroup>
                       {hasLink(product._links, "update-product") && (
                         <DropdownMenuItem asChild>
-                          <Link to={routes.editProduct(product.productId)}>Edit</Link>
+                          <Link to={product.productId}>Edit</Link>
+                        </DropdownMenuItem>
+                      )}
+
+                      {resolveLink(product._links, "delete-product") && (
+                        <DropdownMenuItem
+                          disabled={deleteProductMutation.isPending}
+                          onClick={() => handleArchive(resolveLink(product._links, "delete-product")!, product.name)}>
+                          Archive
                         </DropdownMenuItem>
                       )}
 
@@ -120,7 +145,7 @@ export default function ProductTable({ link, filter, onPageChange }: ProductTabl
             <TableCell colSpan={1} className="text-muted-foreground">
               Showing {products.length} of {data?.page.totalElements} products
             </TableCell>
-            <TableCell colSpan={2}>
+            <TableCell colSpan={3}>
               {data?.page && (
                 <Pager
                   className="justify-end"

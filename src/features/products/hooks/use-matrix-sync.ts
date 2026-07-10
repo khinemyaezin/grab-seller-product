@@ -4,7 +4,7 @@ import { useFormContext, useWatch } from "react-hook-form";
 import { useVariationMatrixMutation } from "@/features/products/hooks/use-variation-matrix";
 import { buildMatrixRequest, buildStructuralFingerprint, responseToVariant } from "@/features/products/adapters/variation-matrix";
 import type { ProductFormValue, VariationType } from "@/features/products/types";
-import { HateoasLink } from "@/types";
+import { HateoasLink } from "@khinemyaezin/seller-api";
 
 export function useMatrixSync(link: HateoasLink) {
     const { getValues, setValue, control } = useFormContext<ProductFormValue>();
@@ -17,7 +17,6 @@ export function useMatrixSync(link: HateoasLink) {
         defaultValue: initTypes
     });
     const lastFingerprintRef = useRef<string>('');
-    console.log("reload")
 
     const regenerate = useCallback(async (types: VariationType[]) => {
         const variants = getValues("product.variants");

@@ -6,7 +6,7 @@ import { Input } from "@khinemyaezin/seller-ui/components/input";
 import { SearchIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ComponentPropsWithoutRef } from 'react';
-import { HateoasLink } from "@/types";
+import { HateoasLink } from "@khinemyaezin/seller-api";
 
 export type CategoryPickerProps = {
     link: HateoasLink
@@ -32,7 +32,7 @@ export default function CategorySearch({ link, value, onChange, ...inputProps }:
             items={items}
             onQueryChange={setQuery}
             onQueryClear={() => {
-                onChange({id:"",name:""});
+                onChange({ id: "", name: "" });
             }}
             onSelect={(item) => onChange({ id: item.id, name: item.name })}
             isLoading={isLoading}

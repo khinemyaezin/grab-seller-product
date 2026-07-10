@@ -3,25 +3,24 @@ import ProductNewForm from "@/features/products/components/product-new-form";
 import { Header } from "@khinemyaezin/seller-ui/layout/header";
 import { Button } from "@khinemyaezin/seller-ui/components/index";
 import { ButtonGroup } from "@khinemyaezin/seller-ui/components/button-group";
-import { routes } from "@khinemyaezin/seller-contracts";
-import { useCatalogRoot } from "@/features/products/hooks/use-catalog-root";
+import { useRoot } from "@/features/products/hooks/use-root";
 import { ArrowLeftIcon } from "lucide-react";
 import { Link } from "react-router";
+import { usePlatform } from "@khinemyaezin/seller-ui";
 
 export default function NewProductPage() {
-    const { data } = useCatalogRoot();
-
+    const { data } = useRoot();
+    const platform = usePlatform();
     return (
-        <div className="container mx-auto max-w-xl">
+        <div className="container mx-auto max-w-xl p-6">
             <Header
                 title="Add Product"
-                description="Create a new warehouse, store, or distribution center."
+                description="Add a new product to your seller catalog."
             >
                 <ButtonGroup>
-                    <Button type="button" variant="secondary">
-                        <Link to={routes.products} className="flex gap-2 items-center">
+                    <Button type="button" variant="secondary" asChild>
+                        <Link to="..">
                             <ArrowLeftIcon />
-                            <span>Back to Products</span>
                         </Link>
                     </Button>
 
@@ -33,7 +32,10 @@ export default function NewProductPage() {
                     variationTypeSearchLink={data.searchVariantTypes}
                     variationOptionSearchLink={data.searchVariantOptions}
                     categorySearchLink={data.searchCategoryLeaves}
-                    createProductLink={data.createProduct} />
+                    createProductLink={data.createProduct}
+                    onSuccess={() => platform?.events.publish("shell:toast:v1", { type: "success", message: "Product created successfully", position: "top-center" })}
+                    onError={() => platform?.events.publish("shell:toast:v1", { type: "error", message: "Failed to create product", position: "top-center" })}
+                />
             )}
         </div>
     );

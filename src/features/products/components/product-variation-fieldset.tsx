@@ -6,7 +6,7 @@ import { Item, ItemActions, ItemContent, ItemTitle } from "@khinemyaezin/seller-
 import { useMatrixSync } from "@/features/products/hooks/use-matrix-sync";
 import type { ProductFormValue } from "@/features/products/types";
 import ProductStandaloneVariantField from "./product-standalone-field";
-import { HateoasLink } from "@/types";
+import { HateoasLink } from "@khinemyaezin/seller-api";
 import { VariationTypeField } from "./product-variation-type-field";
 
 export type ProductVariaitonFieldSetProps = {

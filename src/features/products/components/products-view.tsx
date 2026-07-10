@@ -1,7 +1,6 @@
 
 import { Link } from "react-router";
 import { useCallback, useState } from "react";
-import { routes } from "@khinemyaezin/seller-contracts";
 import { HateoasLink } from "@khinemyaezin/seller-api";
 import { ProductFilterFormValue } from "@/features/products/types";
 import { Button } from "@khinemyaezin/seller-ui/components/button";
@@ -27,10 +26,6 @@ export type ProductsViewProps = {
 export default function ProductsView({ link, canCreate }: ProductsViewProps) {
   const [filter, setFilter] = useState<ProductFilterFormValue>(getInitialProductFilterFormValue());
 
-  const handleFilterChange = useCallback((value: ProductFilterFormValue) => {
-    setFilter(value);
-  }, []);
-
   const handlePageChange = useCallback((page: number) => {
     setFilter((prev) => ({
       ...prev,
@@ -38,24 +33,26 @@ export default function ProductsView({ link, canCreate }: ProductsViewProps) {
     }));
   }, []);
 
+  const handleFilterChange = useCallback((value: ProductFilterFormValue) => {
+    setFilter(value);
+  }, []);
+
   return (
     <Card >
-      <CardHeader>
-        <CardTitle>Product list</CardTitle>
+      <CardHeader className="gap-3">
+        <ProductsFilter
+          value={filter}
+          pageSizes={PAGE_SIZES}
+          onChange={handleFilterChange} />
         <CardAction>
           {canCreate && (
-            <Button>
-              <Link to={routes.newProduct}>Add product</Link>
+            <Button variant="secondary" asChild>
+              <Link to="new">Add product</Link>
             </Button>
           )}
         </CardAction>
       </CardHeader>
       <CardContent className="grid gap-3">
-        <ProductsFilter
-          value={filter}
-          pageSizes={PAGE_SIZES}
-          onChange={handleFilterChange}
-        />
 
         <ProductTable
           link={link}

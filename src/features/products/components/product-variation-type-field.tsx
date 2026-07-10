@@ -4,14 +4,13 @@ import { Button } from "@khinemyaezin/seller-ui/components/button";
 import { ButtonGroup } from "@khinemyaezin/seller-ui/components/button-group";
 import { Field, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@khinemyaezin/seller-ui/components/field";
 import { useVariationType } from "@/features/products/hooks/use-type";
-import { useCatalogRoot } from "@/features/products/hooks/use-catalog-root";
 import { VariationOptionField } from "./product-variation-option-field";
 import { SearchIcon, Trash } from "lucide-react";
 import type { ProductFormValue, VariationType, GetVariationTypeResult } from "@/features/products/types";
 import { MagicSearch } from "@khinemyaezin/seller-ui/components/magic-search";
 import { useEffect, useState } from "react";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@khinemyaezin/seller-ui/components/input-group";
-import { HateoasLink } from "@/types";
+import { HateoasLink } from "@khinemyaezin/seller-api";
 
 type VariationTypeRowProps = {
     typeSearchlink: HateoasLink;

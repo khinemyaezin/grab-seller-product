@@ -1,10 +1,6 @@
 import type { PageInfo, HateoasLink, HateoasPageMetadata } from "@khinemyaezin/seller-api";
 import type { CategoryLeaf } from "./catalog.model";
 
-// ---------------------------------------------------------------------------
-// Catalog Root (HATEOAS Discovery)
-// ---------------------------------------------------------------------------
-
 export interface CatalogRoot {
   self?: HateoasLink;
   searchProducts?: HateoasLink
@@ -15,10 +11,6 @@ export interface CatalogRoot {
   searchVariantOptions?: HateoasLink
   generateVariationMatrix?: HateoasLink
 }
-
-// ---------------------------------------------------------------------------
-// Variation Matrix Response
-// ---------------------------------------------------------------------------
 
 export type VariationMatrixResponseVariation = {
   optionId: string;
@@ -40,17 +32,9 @@ export type VariationMatrixResponse = {
   variantTypes: VariationMatrixResponseVariantType[];
 };
 
-// ---------------------------------------------------------------------------
-// Create / Update Product Responses
-// ---------------------------------------------------------------------------
-
 export type CreateProductResponse = {};
 
 export interface UpdateProductResponse { }
-
-// ---------------------------------------------------------------------------
-// Featured Product Search Response
-// ---------------------------------------------------------------------------
 
 export interface GetFeaturedProductResponse {
   _embedded: {
@@ -71,16 +55,12 @@ export interface GetFeaturedProductResponse {
           }[];
         }[];
       };
-       _links?: Record<string, HateoasLink>;
+      _links?: Record<string, HateoasLink>;
     }[]
   }
   _links?: Record<string, HateoasLink>;
-  page: HateoasPageMetadata; 
+  page: HateoasPageMetadata;
 }
-
-// ---------------------------------------------------------------------------
-// Full Product Detail Response
-// ---------------------------------------------------------------------------
 
 export interface GetFullProductResponse {
   id: string;
@@ -122,18 +102,10 @@ export interface GetFullProductResponse {
   }[];
 }
 
-// ---------------------------------------------------------------------------
-// Category Leaves
-// ---------------------------------------------------------------------------
-
 export interface CategoryLeavesResult {
   leaves: CategoryLeaf[];
   _links?: Record<string, HateoasLink>;
 }
-
-// ---------------------------------------------------------------------------
-// Variation Type / Option Lookups
-// ---------------------------------------------------------------------------
 
 export interface GetVariationTypeResult {
   types: {
@@ -151,4 +123,17 @@ export interface GetVariationOptionResult {
     typeName: string;
   }[];
   _links?: Record<string, HateoasLink>;
+}
+export interface ProductModerationResponse {
+  productId: string;
+  action: string;
+  oldStatus: string;
+  newStatus: string;
+  reason: string;
+}
+
+export interface DeleteProductResponse {
+  productId: string,
+  deleted: boolean
+
 }
