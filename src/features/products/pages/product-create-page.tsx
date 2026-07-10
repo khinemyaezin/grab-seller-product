@@ -3,14 +3,27 @@ import ProductNewForm from "@/features/products/components/product-new-form";
 import { Header } from "@khinemyaezin/seller-ui/layout/header";
 import { Button } from "@khinemyaezin/seller-ui/components/index";
 import { ButtonGroup } from "@khinemyaezin/seller-ui/components/button-group";
-import { useRoot } from "@/features/products/hooks/use-root";
-import { ArrowLeftIcon } from "lucide-react";
-import { Link } from "react-router";
 import { usePlatform } from "@khinemyaezin/seller-ui";
+import { useCatalogLink } from "@/features/products/hooks/use-root";
+import { ArrowLeftIcon } from "lucide-react";
+import { Link, useNavigate } from "react-router";
+import type { ProductLifecycleEvent } from "@/features/products/types";
 
 export default function NewProductPage() {
-    const { data } = useRoot();
+    const canCreate = !!useCatalogLink("createProduct");
     const platform = usePlatform();
+    const navigate = useNavigate();
+
+    const toast = (type: "success" | "error", message: string) =>
+        platform?.events.publish("shell:toast:v1", { type, message, position: "top-center" });
+
+    const handleEvent = (event: ProductLifecycleEvent) => {
+        switch (event.type) {
+            case "created": toast("success", "Product created successfully"); break;
+            case "createFailed": toast("error", "Failed to create product"); break;
+        }
+    };
+
     return (
         <div className="container mx-auto max-w-xl p-6">
             <Header
@@ -23,18 +36,11 @@ export default function NewProductPage() {
                             <ArrowLeftIcon />
                         </Link>
                     </Button>
-
                 </ButtonGroup>
             </Header>
-            {data?.generateVariationMatrix && data.searchVariantTypes && data.searchVariantOptions && data.searchCategoryLeaves && data.createProduct && (
+            {canCreate && (
                 <ProductNewForm
-                    generateMatrixLink={data.generateVariationMatrix}
-                    variationTypeSearchLink={data.searchVariantTypes}
-                    variationOptionSearchLink={data.searchVariantOptions}
-                    categorySearchLink={data.searchCategoryLeaves}
-                    createProductLink={data.createProduct}
-                    onSuccess={() => platform?.events.publish("shell:toast:v1", { type: "success", message: "Product created successfully", position: "top-center" })}
-                    onError={() => platform?.events.publish("shell:toast:v1", { type: "error", message: "Failed to create product", position: "top-center" })}
+                    onLifecycleEvent={handleEvent}
                 />
             )}
         </div>

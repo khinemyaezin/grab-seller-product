@@ -4,25 +4,21 @@ import { Button } from "@khinemyaezin/seller-ui/components/button";
 import { ButtonGroup } from "@khinemyaezin/seller-ui/components/button-group";
 import { Field, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@khinemyaezin/seller-ui/components/field";
 import { useVariationType } from "@/features/products/hooks/use-type";
+import { useCatalogLink } from "@/features/products/hooks/use-root";
 import { VariationOptionField } from "./product-variation-option-field";
 import { SearchIcon, Trash } from "lucide-react";
 import type { ProductFormValue, VariationType, GetVariationTypeResult } from "@/features/products/types";
 import { MagicSearch } from "@khinemyaezin/seller-ui/components/magic-search";
 import { useEffect, useState } from "react";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@khinemyaezin/seller-ui/components/input-group";
-import { HateoasLink } from "@khinemyaezin/seller-api";
 
 type VariationTypeRowProps = {
-    typeSearchlink: HateoasLink;
-    optionSearchLink: HateoasLink;
     index: number;
     onRemove: () => void;
     getValues: UseFormGetValues<ProductFormValue>
 };
 
 export function VariationTypeField({
-    typeSearchlink,
-    optionSearchLink,
     index,
     onRemove,
     control,
@@ -36,7 +32,7 @@ export function VariationTypeField({
         }
     });
     const [query, setQuery] = useState<string>(field.value?.name);
-    const { data } = useVariationType(typeSearchlink, query);
+    const { data } = useVariationType(useCatalogLink("searchVariantTypes"), query);
 
     const { fields, append, remove } = useFieldArray({
         control,
@@ -63,13 +59,14 @@ export function VariationTypeField({
         }
 
         watchedOptions.forEach((option, optionIndex) => {
-            if (optionIndex !== watchedOptions.length - 1 && option.uuid === "" && option.name === "") {
+            if (optionIndex !== watchedOptions.length - 1 && option?.uuid === "" && option?.name === "") {
                 remove(optionIndex);
             }
         });
     }, [watchedOptions]);
 
     useEffect(() => {
+        if (!watchedType) return;
         if (watchedType.uuid && watchedType.uuid !== "" && fields.length === 0) {
             append({ uuid: "", name: "" });
         }
@@ -78,6 +75,8 @@ export function VariationTypeField({
         }
     }, [watchedType])
 
+    // Guard positional lookups: after reset() shrinks variationTypes, this row can render
+    // one cycle with an index past the new array length.
     const getFilteredItems = (response: GetVariationTypeResult) => {
         const data: VariationType[] = response.types.map(t => ({
             uuid: t.id,
@@ -85,10 +84,10 @@ export function VariationTypeField({
             options: []
         }));
 
-        const types = getValues("variationTypes");
-        const existingTypeIds = new Set(types.map((t) => t.uuid));
+        const types = getValues("variationTypes") ?? [];
+        const existingTypeIds = new Set(types.map((t) => t?.uuid));
         return (data || [])
-            .filter((t) => !existingTypeIds.has(t.uuid) || t.uuid === types[index].uuid)
+            .filter((t) => !existingTypeIds.has(t.uuid) || t.uuid === field.value?.uuid)
             .map(t => ({ id: t.uuid, name: t.name }));
     };
 
@@ -147,8 +146,7 @@ export function VariationTypeField({
                                 control={control}
                                 showTrash={optionIndex !== fields.length - 1}
                                 onRemove={() => remove(optionIndex)} name={"product"}
-                                getValues={getValues}
-                                link={optionSearchLink} />
+                                getValues={getValues} />
                         ))}
                     </FieldGroup>
                 </FieldSet>

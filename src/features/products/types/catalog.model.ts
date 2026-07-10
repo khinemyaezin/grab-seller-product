@@ -52,3 +52,14 @@ export type CategoryLeaf = {
   reviewRequired: boolean;
   c2cAllowed: boolean;
 };
+
+export type ProductLifecycleEvent =
+  | { type: "titleResolved"; title: string }
+  | { type: "created" }
+  | { type: "createFailed" }
+  | { type: "updated" }
+  | { type: "updateFailed" }
+  | { type: "archived"; name?: string }
+  | { type: "archiveFailed"; name?: string }
+  | { type: "restored" }
+  | { type: "restoreFailed" };

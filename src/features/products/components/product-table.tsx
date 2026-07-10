@@ -2,9 +2,8 @@
 import { Link } from "react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useProductSearch, useProductDeleteMutation } from "@/features/products/hooks/use-products";
-import { usePlatform } from "@khinemyaezin/seller-ui";
 import { HateoasLink } from "@khinemyaezin/seller-api";
-import { GetFeaturedProductResponse, ProductFilterFormValue } from "@/features/products/types";
+import { GetFeaturedProductResponse, ProductFilterFormValue, ProductLifecycleEvent } from "@/features/products/types";
 import { PageInfo } from "@khinemyaezin/seller-api";
 import { Pager } from "@khinemyaezin/seller-ui/components/pager";
 import {
@@ -41,6 +40,7 @@ export type ProductTableProps = {
   link: HateoasLink;
   filter: ProductFilterFormValue;
   onPageChange?: (page: number) => void;
+  onLifecycleEvent?: (event: ProductLifecycleEvent) => void;
 };
 
 function transformToProducts(data?: GetFeaturedProductResponse): FeatureProduct[] {
@@ -54,9 +54,8 @@ function transformToProducts(data?: GetFeaturedProductResponse): FeatureProduct[
   })) : [];
 }
 
-export default function ProductTable({ link, filter, onPageChange }: ProductTableProps) {
+export default function ProductTable({ link, filter, onPageChange, onLifecycleEvent }: ProductTableProps) {
   const { data } = useProductSearch(link, filter);
-  const platform = usePlatform();
   const deleteProductMutation = useProductDeleteMutation();
   const [showPagination, setShowPagination] = useState<boolean>(false);
   const products = useMemo(() => transformToProducts(data), [data]);
@@ -66,14 +65,12 @@ export default function ProductTable({ link, filter, onPageChange }: ProductTabl
       deleteProductMutation.mutate(
         { link: deleteLink },
         {
-          onSuccess: () =>
-            platform?.events.publish("shell:toast:v1", { type: "success", message: `${name} archived`, position: "top-center" }),
-          onError: () =>
-            platform?.events.publish("shell:toast:v1", { type: "error", message: `Failed to archive ${name}`, position: "top-center" }),
+          onSuccess: () => onLifecycleEvent?.({ type: "archived", name }),
+          onError: () => onLifecycleEvent?.({ type: "archiveFailed", name }),
         },
       );
     },
-    [deleteProductMutation, platform],
+    [deleteProductMutation, onLifecycleEvent],
   );
 
   useEffect(() => {
@@ -118,7 +115,7 @@ export default function ProductTable({ link, filter, onPageChange }: ProductTabl
                       )}
 
                       {resolveLink(product._links, "delete-product") && (
-                        <DropdownMenuItem
+                        <DropdownMenuItem variant="destructive"
                           disabled={deleteProductMutation.isPending}
                           onClick={() => handleArchive(resolveLink(product._links, "delete-product")!, product.name)}>
                           Archive

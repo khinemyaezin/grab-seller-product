@@ -18,12 +18,15 @@ function getInitialProductFilterFormValue(): ProductFilterFormValue {
   };
 }
 
+import type { ProductLifecycleEvent } from "@/features/products/types";
+
 export type ProductsViewProps = {
   link: HateoasLink;
   canCreate: boolean;
+  onLifecycleEvent?: (event: ProductLifecycleEvent) => void;
 };
 
-export default function ProductsView({ link, canCreate }: ProductsViewProps) {
+export default function ProductsView({ link, canCreate, onLifecycleEvent }: ProductsViewProps) {
   const [filter, setFilter] = useState<ProductFilterFormValue>(getInitialProductFilterFormValue());
 
   const handlePageChange = useCallback((page: number) => {
@@ -58,6 +61,7 @@ export default function ProductsView({ link, canCreate }: ProductsViewProps) {
           link={link}
           filter={filter}
           onPageChange={handlePageChange}
+          onLifecycleEvent={onLifecycleEvent}
         />
       </CardContent>
     </Card>

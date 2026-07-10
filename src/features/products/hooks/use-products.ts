@@ -5,12 +5,13 @@ import type { HateoasLink } from "@khinemyaezin/seller-api";
 import type { CreateProductRequest, GetFullProductResponse, GetFeaturedProductRequest, GetFeaturedProductResponse, UpdateProductRequest, UpdateProductResponse, ProductModerationResponse, DeleteProductResponse } from "@/features/products/types";
 import { resolveUrlTemplate } from "@khinemyaezin/seller-api";
 
+
 export function useProductMutation() {
   const queryClient = useQueryClient();
   return useMutation<void, Error, { link: HateoasLink, request: CreateProductRequest }>({
     mutationFn: ({ link, request }) =>
       catalogService.createProduct(link, request),
-    onSuccess: (_data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
     },
   });
@@ -21,7 +22,7 @@ export function useProductUpdateMutation() {
   return useMutation<UpdateProductResponse, Error, { link: HateoasLink, request: UpdateProductRequest }>({
     mutationFn: ({ link, request }) =>
       catalogService.updateProduct(link, request),
-    onSuccess: (_data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
     },
   });
@@ -34,7 +35,7 @@ export function useProductDeleteMutation() {
       catalogService.deleteProduct(link),
     onSuccess: (resp) => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
-      queryClient.invalidateQueries({ queryKey: ["product", resp.productId ] });
+      queryClient.invalidateQueries({ queryKey: ["product", resp.productId] });
     },
   });
 }
@@ -61,11 +62,12 @@ export function useProductSearch(productsLink?: HateoasLink, filters?: GetFeatur
   });
 }
 
-export function useProductGet(productLink: HateoasLink, productId: string) {
-  const extendedLink = resolveUrlTemplate({ "productId": productId }, productLink)
+export function useProductGet(productLink: HateoasLink | undefined, productId: string) {
+  const extendedLink = productLink && resolveUrlTemplate({ "productId": productId }, productLink)
   return useQuery<GetFullProductResponse, Error>({
     queryKey: ["product", productId],
-    queryFn: async () => catalogService.getFullProduct(extendedLink),
+    queryFn: async () => catalogService.getFullProduct(extendedLink!),
+    enabled: !!productLink,
     staleTime: 5 * 60 * 1000,
   });
 }

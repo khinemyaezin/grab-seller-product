@@ -1,10 +1,23 @@
 
 import { Header } from "@khinemyaezin/seller-ui/layout/header";
+import { usePlatform } from "@khinemyaezin/seller-ui";
 import { useRoot } from "@/features/products/hooks/use-root";
 import ProductsView from "@/features/products/components/products-view";
+import type { ProductLifecycleEvent } from "@/features/products/types";
 
 export default function AdminProductsPage() {
   const { data: catalogRoot } = useRoot();
+  const platform = usePlatform();
+
+  const toast = (type: "success" | "error", message: string) =>
+    platform?.events.publish("shell:toast:v1", { type, message, position: "top-center" });
+
+  const handleEvent = (event: ProductLifecycleEvent) => {
+    switch (event.type) {
+      case "archived": toast("success", `${event.name} archived`); break;
+      case "archiveFailed": toast("error", `Failed to archive ${event.name}`); break;
+    }
+  };
 
   return (
     <div className="container mx-auto max-w-5xl p-6">
@@ -17,6 +30,7 @@ export default function AdminProductsPage() {
         <ProductsView
           link={catalogRoot.searchProducts}
           canCreate={!!catalogRoot.createProduct}
+          onLifecycleEvent={handleEvent}
         />
       )}
     </div>

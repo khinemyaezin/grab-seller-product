@@ -3,23 +3,19 @@ import ProductBasicFieldSet from "./product-basic-fieldset";
 import ProductVariationFieldSet from "./product-variation-fieldset";
 import { generateSlug } from "@/features/products/utils";
 import { useProductMutation } from "@/features/products/hooks/use-products";
+import { useCatalogLink } from "@/features/products/hooks/use-root";
 import { Card, CardContent, CardFooter } from "@khinemyaezin/seller-ui/components/card";
 import { Separator } from "@khinemyaezin/seller-ui/components/separator";
 import { Button, ButtonStatus } from "@khinemyaezin/seller-ui/components/index";
 import { ButtonGroup } from "@khinemyaezin/seller-ui/components/button-group";
-import { HateoasLink } from "@khinemyaezin/seller-api";
 import { ProductFormValue, CreateProductRequest } from "../types";
 import { useEffect } from "react";
 
+import type { ProductLifecycleEvent } from "../types";
+
 export type ProductNewFormProps = {
-    generateMatrixLink: HateoasLink,
-    variationTypeSearchLink: HateoasLink,
-    variationOptionSearchLink: HateoasLink,
-    categorySearchLink: HateoasLink,
-    createProductLink: HateoasLink,
-    onSuccess?: () => void,
-    onError?: () => void
-}
+    onLifecycleEvent?: (event: ProductLifecycleEvent) => void;
+};
 
 const DEFAULT_PRODUCT_FORM_VALUE: ProductFormValue = {
     product: {
@@ -66,15 +62,8 @@ function buildCreatePayload(values: ProductFormValue): CreateProductRequest {
     };
 }
 
-export default function ProductNewForm({
-    generateMatrixLink,
-    variationTypeSearchLink,
-    variationOptionSearchLink,
-    categorySearchLink,
-    createProductLink,
-    onSuccess,
-    onError
-}: ProductNewFormProps) {
+export default function ProductNewForm({ onLifecycleEvent }: ProductNewFormProps) {
+    const createProductLink = useCatalogLink("createProduct");
     const form = useForm<ProductFormValue>({
         defaultValues: DEFAULT_PRODUCT_FORM_VALUE,
         mode: "onSubmit"
@@ -86,26 +75,27 @@ export default function ProductNewForm({
 
     useEffect(() => {
         if (createProductApi.isSuccess) {
-            onSuccess?.();
+            onLifecycleEvent?.({ type: "created" });
             const timer = setTimeout(() => {
                 createProductApi.reset();
                 reset();
             }, 900);
             return () => clearTimeout(timer);
         }
-    }, [createProductApi.isSuccess, createProductApi, onSuccess]);
+    }, [createProductApi.isSuccess, createProductApi, reset, onLifecycleEvent]);
 
     useEffect(() => {
         if (createProductApi.isError) {
-            onError?.();
+            onLifecycleEvent?.({ type: "createFailed" });
             const timer = setTimeout(() => {
                 createProductApi.reset();
             }, 3000);
             return () => clearTimeout(timer);
         }
-    }, [createProductApi.isError, createProductApi, onError]);
+    }, [createProductApi.isError, createProductApi, onLifecycleEvent]);
 
     const handleFormSubmit = async (values: ProductFormValue) => {
+        if (!createProductLink) return;
         const payload = buildCreatePayload(values);
         try {
             await createProductApi.mutateAsync({ link: createProductLink, request: payload });
@@ -119,15 +109,9 @@ export default function ProductNewForm({
             <form onSubmit={handleSubmit(handleFormSubmit)} className="grid gap-6">
                 <Card>
                     <CardContent>
-                        <ProductBasicFieldSet
-                            searchCategoryLink={categorySearchLink}
-                        />
+                        <ProductBasicFieldSet />
                         <Separator className="my-6" />
-                        <ProductVariationFieldSet
-                            generateMatrixLink={generateMatrixLink}
-                            variationTypeSearchLink={variationTypeSearchLink}
-                            variationOptionSearchLink={variationOptionSearchLink}
-                        />
+                        <ProductVariationFieldSet />
                     </CardContent>
                     {isDirty && (
                         <CardFooter className="flex justify-end border-t">

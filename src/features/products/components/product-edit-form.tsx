@@ -7,26 +7,18 @@ import ProductBasicFieldSet from "./product-basic-fieldset"
 import ProductVariationFieldSet from "./product-variation-fieldset"
 import { generateSlug } from "@/features/products/utils"
 import { useProductGet, useProductUpdateMutation, useProductDeleteMutation, useProductRestoreMutation } from "@/features/products/hooks/use-products"
+import { useCatalogLink } from "@/features/products/hooks/use-root"
 import { getVariantName } from "@/features/products/adapters/variation-matrix"
 import { isEqual } from "lodash"
 import { useEffect, useMemo } from "react"
 import { ApiError } from "@khinemyaezin/seller-api"
 import { Separator } from "@khinemyaezin/seller-ui/components/separator"
-import { HateoasLink, resolveLink } from "@khinemyaezin/seller-api"
-import { ProductFormValue, UPDATE_INTENT, UpdateProductRequest, GetFullProductResponse } from "../types"
+import { resolveLink } from "@khinemyaezin/seller-api"
+import { ProductFormValue, UPDATE_INTENT, UpdateProductRequest, GetFullProductResponse, ProductLifecycleEvent } from "../types"
 
 export type ProductEditFormProps = {
-    generateMatrixLink: HateoasLink,
-    variationTypeSearchLink: HateoasLink,
-    variationOptionSearchLink: HateoasLink,
-    categorySearchLink: HateoasLink,
-    getProductLink: HateoasLink,
     productId: string,
-    onResolvedTitle?: (name: string) => void,
-    onSuccess?: () => void,
-    onError?: () => void,
-    onArchived?: () => void,
-    onArchiveError?: () => void
+    onLifecycleEvent?: (event: ProductLifecycleEvent) => void;
 }
 
 const DEFAULT_PRODUCT_FORM_VALUE: ProductFormValue = {
@@ -151,18 +143,10 @@ function transformProductToFormValue(apiData: GetFullProductResponse): ProductFo
 }
 
 export default function ProductEditForm({
-    generateMatrixLink,
-    variationTypeSearchLink,
-    variationOptionSearchLink,
-    categorySearchLink,
-    getProductLink,
     productId,
-    onResolvedTitle,
-    onSuccess,
-    onError,
-    onArchived,
-    onArchiveError
+    onLifecycleEvent
 }: ProductEditFormProps) {
+    const getProductLink = useCatalogLink("getProduct");
     const form = useForm<ProductFormValue>({
         defaultValues: DEFAULT_PRODUCT_FORM_VALUE,
         mode: "onSubmit",
@@ -193,9 +177,9 @@ export default function ProductEditForm({
 
     useEffect(() => {
         if (productData?.name) {
-            onResolvedTitle?.(productData.name);
+            onLifecycleEvent?.({ type: "titleResolved", title: productData.name });
         }
-    }, [productData?.name, onResolvedTitle]);
+    }, [productData?.name, onLifecycleEvent]);
 
     useEffect(() => {
         if (productData) {
@@ -206,24 +190,24 @@ export default function ProductEditForm({
 
     useEffect(() => {
         if (updateProductMutation.isSuccess) {
-            onSuccess?.();
+            onLifecycleEvent?.({ type: "updated" });
             const timer = setTimeout(() => {
                 refetch();
                 updateProductMutation.reset();
             }, 900);
             return () => clearTimeout(timer);
         }
-    }, [updateProductMutation.isSuccess, refetch, updateProductMutation, onSuccess]);
+    }, [updateProductMutation.isSuccess, refetch, updateProductMutation, onLifecycleEvent]);
 
     useEffect(() => {
         if (updateProductMutation.isError) {
-            onError?.();
+            onLifecycleEvent?.({ type: "updateFailed" });
             const timer = setTimeout(() => {
                 updateProductMutation.reset();
             }, 3000);
             return () => clearTimeout(timer);
         }
-    }, [updateProductMutation.isError, updateProductMutation, onError]);
+    }, [updateProductMutation.isError, updateProductMutation, onLifecycleEvent]);
 
     function handleFormSubmit(values: ProductFormValue) {
         if (!productUpdateLink) return;
@@ -248,8 +232,8 @@ export default function ProductEditForm({
         deleteProductMutation.mutate(
             { link: productDeleteLink },
             {
-                onSuccess: () => onArchived?.(),
-                onError: () => onArchiveError?.(),
+                onSuccess: () => { onLifecycleEvent?.({ type: "archived" }); deleteProductMutation.reset() },
+                onError: () => { onLifecycleEvent?.({ type: "archiveFailed" }); deleteProductMutation.reset() },
             },
         );
     }
@@ -258,7 +242,10 @@ export default function ProductEditForm({
         if (!productRestoreLink) return;
         restoreProductMutation.mutate(
             { link: productRestoreLink },
-         
+            {
+                onSuccess: () => { onLifecycleEvent?.({ type: "restored" }); restoreProductMutation.reset() },
+                onError: () => { onLifecycleEvent?.({ type: "restoreFailed" }); restoreProductMutation.reset() },
+            },
         );
     }
 
@@ -285,15 +272,9 @@ export default function ProductEditForm({
             <form onSubmit={handleSubmit(handleFormSubmit)} className="grid gap-6">
                 <Card>
                     <CardContent>
-                        <ProductBasicFieldSet
-                            searchCategoryLink={categorySearchLink}
-                        />
+                        <ProductBasicFieldSet />
                         <Separator className="my-6" />
-                        <ProductVariationFieldSet
-                            generateMatrixLink={generateMatrixLink}
-                            variationTypeSearchLink={variationTypeSearchLink}
-                            variationOptionSearchLink={variationOptionSearchLink}
-                        />
+                        <ProductVariationFieldSet />
                     </CardContent>
                     <CardFooter className="flex justify-end border-t">
                         <ButtonGroup>
@@ -302,7 +283,7 @@ export default function ProductEditForm({
                                     <Button
                                         type="button"
                                         variant="secondary"
-                                        disabled={restoreProductMutation.isPending}
+                                        disabled={restoreProductMutation.isPending|| restoreProductMutation.isSuccess}
                                         onClick={handleOnRestore}>
                                         <ButtonStatus
                                             status={
@@ -310,9 +291,7 @@ export default function ProductEditForm({
                                                     ? "pending"
                                                     : restoreProductMutation.isSuccess
                                                         ? "success"
-                                                        : restoreProductMutation.isError
-                                                            ? "failed"
-                                                            : "idle"
+                                                        : "idle"
                                             }
                                             pendingLabel="Restoring"
                                             successLabel="Restored">
@@ -323,8 +302,8 @@ export default function ProductEditForm({
                                 {productDeleteLink && (
                                     <Button
                                         type="button"
-                                        variant="secondary"
-                                        disabled={deleteProductMutation.isPending}
+                                        variant="destructive"
+                                        disabled={deleteProductMutation.isPending || deleteProductMutation.isSuccess}
                                         onClick={handleArchive}>
                                         <ButtonStatus
                                             status={
@@ -332,9 +311,7 @@ export default function ProductEditForm({
                                                     ? "pending"
                                                     : deleteProductMutation.isSuccess
                                                         ? "success"
-                                                        : deleteProductMutation.isError
-                                                            ? "failed"
-                                                            : "idle"
+                                                        : "idle"
                                             }
                                             pendingLabel="Archiving"
                                             successLabel="Archived">
@@ -345,16 +322,14 @@ export default function ProductEditForm({
                             </ButtonGroup>
                             {isFormDirty && (
                                 <ButtonGroup>
-                                    <Button type="submit" disabled={updateProductMutation.isPending}>
+                                    <Button type="submit" disabled={updateProductMutation.isPending || updateProductMutation.isSuccess}>
                                         <ButtonStatus
                                             status={
                                                 updateProductMutation.isPending
                                                     ? "pending"
                                                     : updateProductMutation.isSuccess
                                                         ? "success"
-                                                        : updateProductMutation.isError
-                                                            ? "failed"
-                                                            : "idle"
+                                                        : "idle"
                                             }
                                             pendingLabel="Saving…"
                                             successLabel="Saved">

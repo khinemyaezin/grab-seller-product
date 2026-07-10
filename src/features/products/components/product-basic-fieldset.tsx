@@ -3,14 +3,9 @@ import { Input } from "@khinemyaezin/seller-ui/components/index";
 import { FieldGroup, Field, FieldLabel, FieldError, FieldSet, FieldLegend, FieldDescription } from "@khinemyaezin/seller-ui/components/field";
 import { useFormContext, Controller } from "react-hook-form";
 import CategorySearch from "./category-search";
-import { HateoasLink } from "@khinemyaezin/seller-api";
 import { ProductFormValue } from "../types";
 
-export type ProductBasicFieldSetProps = {
-    searchCategoryLink: HateoasLink
-}
-
-export default function ProductBasicFieldSet({ searchCategoryLink }: ProductBasicFieldSetProps) {
+export default function ProductBasicFieldSet() {
     const { control } = useFormContext<ProductFormValue>();
 
     return (
@@ -53,7 +48,6 @@ export default function ProductBasicFieldSet({ searchCategoryLink }: ProductBasi
                         <Field data-invalid={fieldState.invalid}>
                             <FieldLabel htmlFor="category-search">Category</FieldLabel>
                             <CategorySearch
-                                link={searchCategoryLink}
                                 value={field.value?.name || ""}
                                 onChange={field.onChange}
                                 aria-invalid={fieldState.invalid}

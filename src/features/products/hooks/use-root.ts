@@ -14,3 +14,9 @@ export function useRoot() {
     staleTime: Infinity,
   });
 }
+
+// ponytail: no provider needed — useRoot() is a shared React Query cache (staleTime: Infinity),
+// so every caller dedupes onto one fetch. This is just a named accessor for a single link.
+export function useCatalogLink(rel: keyof CatalogRoot) {
+  return useRoot().data?.[rel];
+}

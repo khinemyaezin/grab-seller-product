@@ -6,27 +6,16 @@ import { Item, ItemActions, ItemContent, ItemTitle } from "@khinemyaezin/seller-
 import { useMatrixSync } from "@/features/products/hooks/use-matrix-sync";
 import type { ProductFormValue } from "@/features/products/types";
 import ProductStandaloneVariantField from "./product-standalone-field";
-import { HateoasLink } from "@khinemyaezin/seller-api";
 import { VariationTypeField } from "./product-variation-type-field";
 
-export type ProductVariaitonFieldSetProps = {
-    generateMatrixLink: HateoasLink,
-    variationTypeSearchLink: HateoasLink,
-    variationOptionSearchLink: HateoasLink
-}
-
-export default function ProductVariationFieldSet({
-    generateMatrixLink,
-    variationTypeSearchLink,
-    variationOptionSearchLink
-}: ProductVariaitonFieldSetProps) {
+export default function ProductVariationFieldSet() {
     const { control, getValues } = useFormContext<ProductFormValue>();
     const { fields, remove, append } = useFieldArray({
         control,
         name: "variationTypes"
     });
 
-    useMatrixSync(generateMatrixLink);
+    useMatrixSync();
 
     const handleAddType = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -58,8 +47,6 @@ export default function ProductVariationFieldSet({
                                 control={control}
                                 name={`variationTypes.${typeIndex}`}
                                 getValues={getValues}
-                                typeSearchlink={variationTypeSearchLink}
-                                optionSearchLink={variationOptionSearchLink}
                             />)}
                     </FieldGroup>
                 )}

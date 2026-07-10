@@ -9,6 +9,7 @@ export type {
   VariationType,
   MatrixVariantVariation,
   CategoryLeaf,
+  ProductLifecycleEvent
 } from "./catalog.model";
 
 // Request DTOs

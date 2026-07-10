@@ -1,6 +1,7 @@
 
 import type { GetVariationOptionResult, VariationOption, ProductFormValue } from "@/features/products/types";
 import { useVariationOptionSearch } from "@/features/products/hooks/use-option";
+import { useCatalogLink } from "@/features/products/hooks/use-root";
 import { useController, UseControllerProps, UseFormGetValues } from "react-hook-form";
 import { SearchIcon, Trash } from "lucide-react";
 import { useState } from "react";
@@ -9,10 +10,8 @@ import { Button } from "@khinemyaezin/seller-ui/components/index";
 import { ButtonGroup } from "@khinemyaezin/seller-ui/components/button-group";
 import { Field, FieldError } from "@khinemyaezin/seller-ui/components/field";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@khinemyaezin/seller-ui/components/input-group";
-import { HateoasLink } from "@khinemyaezin/seller-api";
 
 interface VariationOptionItemProps {
-    link: HateoasLink;
     index: number;
     typeIndex: number
     getValues: UseFormGetValues<ProductFormValue>
@@ -21,18 +20,18 @@ interface VariationOptionItemProps {
 }
 
 export function VariationOptionField({
-    link,
     typeIndex,
     index,
     onRemove,
     getValues,
     showTrash
 }: UseControllerProps<ProductFormValue> & VariationOptionItemProps) {
+    const link = useCatalogLink("searchVariantOptions");
     const { field, fieldState } = useController({
         name: `variationTypes.${typeIndex}.options.${index}`,
         rules: {
             validate: (value) => {
-                const allOptions = getValues(`variationTypes.${typeIndex}.options`);
+                const allOptions = getValues(`variationTypes.${typeIndex}.options`) ?? [];
                 const isLastOption = index === allOptions.length - 1;
 
                 if (isLastOption && !value?.uuid && allOptions.length > 1) {
@@ -42,9 +41,11 @@ export function VariationOptionField({
             },
         }
     })
+    // Guard positional lookups: after reset() shrinks the form arrays (e.g. refetch following
+    // an archive), this row can render one cycle with an index past the new array length.
     const type = getValues(`variationTypes.${typeIndex}`);
     const [query, setQuery] = useState<string>(field.value?.name);
-    const { data } = useVariationOptionSearch(link, query, type.uuid);
+    const { data } = useVariationOptionSearch(link, query, type?.uuid ?? "");
 
     const getFilteredItems = (response: GetVariationOptionResult): DisplayItem[] => {
         const data: VariationOption[] = response.options.map(t => ({
@@ -52,11 +53,13 @@ export function VariationOptionField({
             name: t.name,
         }));
 
-        const options = getValues(`variationTypes.${typeIndex}.options`);
-        const existingOptionsIds = new Set(options.map((option) => option.uuid));
+        // Elements can be undefined too: rhf back-fills slots when a row registers
+        // at an index past the array reset() just shrank.
+        const options = getValues(`variationTypes.${typeIndex}.options`) ?? [];
+        const existingOptionsIds = new Set(options.map((option) => option?.uuid));
 
         return (data || [])
-            .filter((option) => !existingOptionsIds.has(option.uuid) || option.uuid === options[index].uuid)
+            .filter((option) => !existingOptionsIds.has(option.uuid) || option.uuid === field.value?.uuid)
             .map(option => ({ id: option.uuid, name: option.name }));
     };
 
