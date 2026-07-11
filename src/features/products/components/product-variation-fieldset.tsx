@@ -50,8 +50,8 @@ export default function ProductVariationFieldSet() {
                             />)}
                     </FieldGroup>
                 )}
-                <Item asChild size="sm" className="rounded-none">
-                    <a href="#" onClick={handleAddType}>
+                <Item asChild size="sm" className="rounded-none cursor-pointer hover:bg-muted transition-colors">
+                    <button type="button" onClick={handleAddType}>
                         <ItemActions>
                             <Plus />
                         </ItemActions>
@@ -60,7 +60,7 @@ export default function ProductVariationFieldSet() {
                                 {fields.length == 0 ? "Add variation" : "Add another option"}
                             </ItemTitle>
                         </ItemContent>
-                    </a>
+                    </button>
                 </Item>
             </div>
             {fields.length !== 0 && (

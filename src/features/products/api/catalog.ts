@@ -33,7 +33,7 @@ export const catalogService = {
     api.followLink<GetVariationOptionResult>(link, "GET", undefined, undefined, headers),
 
   searchProducts: (link: HateoasLink, request: GetFeaturedProductRequest, headers?: Record<string, string>) => {
-    const { page, size, ...restFilter } = request; 
+    const { page, size, ...restFilter } = request;
     const params = { page: String(page), size: String(size) };
     const resolvedLink = resolveUrlTemplate({}, link);
     return api.followLink<GetFeaturedProductResponse>(resolvedLink, "POST", restFilter, params, headers);
@@ -49,5 +49,8 @@ export const catalogService = {
     api.followLink<DeleteProductResponse>(link, "DELETE", undefined, undefined, headers),
 
   restoreProduct: (link: HateoasLink, headers?: Record<string, string>) =>
+    api.followLink<ProductModerationResponse>(link, "POST", undefined, undefined, headers),
+
+  publishProduct: (link: HateoasLink, headers?: Record<string, string>) =>
     api.followLink<ProductModerationResponse>(link, "POST", undefined, undefined, headers),
 };

@@ -11,10 +11,11 @@ import { useCatalogLink } from "@/features/products/hooks/use-root"
 import { getVariantName } from "@/features/products/adapters/variation-matrix"
 import { isEqual } from "lodash"
 import { useEffect, useMemo } from "react"
-import { ApiError } from "@khinemyaezin/seller-api"
 import { Separator } from "@khinemyaezin/seller-ui/components/separator"
 import { resolveLink } from "@khinemyaezin/seller-api"
 import { ProductFormValue, UPDATE_INTENT, UpdateProductRequest, GetFullProductResponse, ProductLifecycleEvent } from "../types"
+import { ProductStatus } from "./product-status"
+import { Archive, RotateCcw } from "lucide-react"
 
 export type ProductEditFormProps = {
     productId: string,
@@ -159,6 +160,7 @@ export default function ProductEditForm({
     const productUpdateLink = resolveLink(productData?._links, "update-product");
     const productDeleteLink = resolveLink(productData?._links, "delete-product");
     const productRestoreLink = resolveLink(productData?._links, "restore-product");
+    const productPublishLink = resolveLink(productData?._links, "publish-product")
 
     const updateProductMutation = useProductUpdateMutation();
     const deleteProductMutation = useProductDeleteMutation();
@@ -243,8 +245,8 @@ export default function ProductEditForm({
 
     if (isProductLoading || !productData) {
         return (
-            <div className="container mx-auto max-w-xl">
-                <div className="flex w-full max-w-xs flex-col gap-7">
+            <div className="">
+                <div className="flex w-full flex-col gap-7">
                     <div className="flex flex-col gap-3">
                         <Skeleton className="h-4 w-20" />
                         <Skeleton className="h-8 w-full" />
@@ -259,58 +261,68 @@ export default function ProductEditForm({
         );
     }
 
+    const actionButtons = [
+        {
+            show: productRestoreLink,
+            onClick: handleOnRestore,
+            mutation: restoreProductMutation,
+            variant: "secondary" as const,
+            pendingLabel: "Restoring",
+            successLabel: "Restored",
+            label: "Restore",
+            Icon: RotateCcw
+        },
+        {
+            show: productDeleteLink,
+            onClick: handleArchive,
+            mutation: deleteProductMutation,
+            variant: "destructive" as const,
+            pendingLabel: "Archiving",
+            successLabel: "Archived",
+            label: "Archive",
+            Icon: Archive
+        }
+    ].reduce<React.ReactNode[]>((acc, btn, index) => {
+        if (btn.show) {
+            acc.push(
+                <Button
+                    key={index}
+                    type="button"
+                    variant={btn.variant}
+                    disabled={btn.mutation.isPending || btn.mutation.isSuccess}
+                    onClick={btn.onClick}>
+                    <ButtonStatus
+                        status={
+                            btn.mutation.isPending
+                                ? "pending"
+                                : btn.mutation.isSuccess
+                                    ? "success"
+                                    : "idle"
+                        }
+                        pendingLabel={btn.pendingLabel}
+                        successLabel={btn.successLabel}>
+                        <btn.Icon className="mr-1 h-4 w-4" />
+                        {btn.label}
+                    </ButtonStatus>
+                </Button>
+            );
+        }
+        return acc;
+    }, []);
+
     return (
         <FormProvider {...form}>
-            <form onSubmit={handleSubmit(handleFormSubmit)} className="grid gap-6">
-                <Card>
+            <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col md:flex-row gap-6 items-start">
+                <Card className="w-full md:w-[60%]">
                     <CardContent>
                         <ProductBasicFieldSet />
                         <Separator className="my-6" />
                         <ProductVariationFieldSet />
                     </CardContent>
-                    <CardFooter className="flex justify-end border-t">
+                    <CardFooter className="flex justify-end">
                         <ButtonGroup>
                             <ButtonGroup>
-                                {productRestoreLink && (
-                                    <Button
-                                        type="button"
-                                        variant="secondary"
-                                        disabled={restoreProductMutation.isPending || restoreProductMutation.isSuccess}
-                                        onClick={handleOnRestore}>
-                                        <ButtonStatus
-                                            status={
-                                                restoreProductMutation.isPending
-                                                    ? "pending"
-                                                    : restoreProductMutation.isSuccess
-                                                        ? "success"
-                                                        : "idle"
-                                            }
-                                            pendingLabel="Restoring"
-                                            successLabel="Restored">
-                                            Restore
-                                        </ButtonStatus>
-                                    </Button>
-                                )}
-                                {productDeleteLink && (
-                                    <Button
-                                        type="button"
-                                        variant="destructive"
-                                        disabled={deleteProductMutation.isPending || deleteProductMutation.isSuccess}
-                                        onClick={handleArchive}>
-                                        <ButtonStatus
-                                            status={
-                                                deleteProductMutation.isPending
-                                                    ? "pending"
-                                                    : deleteProductMutation.isSuccess
-                                                        ? "success"
-                                                        : "idle"
-                                            }
-                                            pendingLabel="Archiving"
-                                            successLabel="Archived">
-                                            Archive
-                                        </ButtonStatus>
-                                    </Button>
-                                )}
+                                {actionButtons}
                             </ButtonGroup>
                             {isFormDirty && (
                                 <ButtonGroup>
@@ -333,6 +345,12 @@ export default function ProductEditForm({
                         </ButtonGroup>
                     </CardFooter>
                 </Card>
+                <div className="flex w-full md:flex-1 flex-col gap-6">
+                    <ProductStatus
+                        status={productData.status}
+                        link={productPublishLink}
+                        onLifecycleEvent={onLifecycleEvent} />
+                </div>
             </form>
 
         </FormProvider>

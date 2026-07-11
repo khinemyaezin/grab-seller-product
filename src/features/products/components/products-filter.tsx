@@ -79,6 +79,7 @@ export default function ProductsFilter({ onChange }: ProductsFilterProps) {
         </InputGroupAddon>
         <ProductNameInput control={control} name="productName" />
         <InputGroupAddon align="inline-end">
+          <InputGroupText className="text-xs text-muted-foreground">Status</InputGroupText>
           <ProductStatusSelect control={control} name="productStatus" productStatus={PRODUCT_STATUS} />
         </InputGroupAddon>
         <InputGroupAddon align="inline-end">
@@ -173,7 +174,7 @@ function ProductStatusSelect({
           <SelectItem value="ALL">All</SelectItem>
           {productStatus.map((item) => (
             <SelectItem key={item} value={item}>
-              {item}
+              {item.charAt(0).toUpperCase() + item.slice(1).toLowerCase()}
             </SelectItem>
           ))}
         </SelectGroup>

@@ -19,12 +19,12 @@ export default function ProductsView({ link, canCreate, onLifecycleEvent }: Prod
   const { filter, updateCriteria, updatePage } = useProductFilter();
 
   return (
-    <Card >
+    <Card className="gap-3">
       <CardHeader className="gap-3">
         <ProductsFilter onChange={updateCriteria} />
         <CardAction>
           {canCreate && (
-            <Button variant="secondary" asChild>
+            <Button variant="outline" asChild>
               <Link to="new">Add product</Link>
             </Button>
           )}

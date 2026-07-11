@@ -104,7 +104,7 @@ export default function ProductNewForm({ onLifecycleEvent }: ProductNewFormProps
                         <ProductVariationFieldSet />
                     </CardContent>
                     {isDirty && (
-                        <CardFooter className="flex justify-end border-t">
+                        <CardFooter className="flex justify-end">
                             <ButtonGroup>
                                 <ButtonGroup>
 
@@ -120,7 +120,7 @@ export default function ProductNewForm({ onLifecycleEvent }: ProductNewFormProps
                                         }
                                             pendingLabel="Saving…"
                                             successLabel="Saved">
-                                            Save Changes
+                                            Save
                                         </ButtonStatus>
                                     </Button>
 

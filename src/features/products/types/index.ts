@@ -40,7 +40,7 @@ export type {
   GetVariationTypeResult,
   GetVariationOptionResult,
   ProductModerationResponse,
-  DeleteProductResponse
+  DeleteProductResponse,
 } from "./catalog.response";
 
 // Form Values

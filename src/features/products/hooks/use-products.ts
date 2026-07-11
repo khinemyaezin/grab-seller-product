@@ -71,3 +71,15 @@ export function useProductGet(productLink: HateoasLink | undefined, productId: s
     staleTime: 5 * 60 * 1000,
   });
 }
+
+export function useProductPublishMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<ProductModerationResponse, Error, { link: HateoasLink }>({
+    mutationFn: (({ link }) => catalogService.publishProduct(link)),
+    onSuccess: (resp) => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["product", resp.productId] });
+    }
+  })
+}

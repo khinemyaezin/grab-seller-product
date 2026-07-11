@@ -29,11 +29,13 @@ export default function EditProductPage() {
       case "archiveFailed": toast("error", "Failed to archive product"); break;
       case "restored": toast("success", "Product restored successfully"); break;
       case "restoreFailed": toast("error", "Failed to restore product"); break;
+      case "published": toast("success", "Product published successfully"); break;
+      case "publishFailed": toast("error", event.name?? "Failed to publish product"); break;
     }
   };
 
   return (
-    <div className="container mx-auto max-w-xl p-6">
+    <div className="container mx-auto max-w-5xl p-6">
       <Header
         title="Edit Product"
         description="Update your product details."

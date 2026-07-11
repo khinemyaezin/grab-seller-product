@@ -18,6 +18,7 @@ import { Badge, Button } from "@khinemyaezin/seller-ui/components/index";
 import { DropdownMenuTrigger, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenu } from "@khinemyaezin/seller-ui/components/dropdown-menu";
 import { hasLink, resolveLink } from "@khinemyaezin/seller-api";
 import { Ellipsis, ImageIcon } from "lucide-react";
+import { formatProductStatus, getProductStatusBadgeClass } from "./product-status";
 
 type FeatureProduct = {
   productId: string;
@@ -102,8 +103,12 @@ export default function ProductTable({ link, filter, onPageChange, onLifecycleEv
                 <span className="font-medium">{product.name}</span>
                 <span className="font-normal text-muted-foreground">{product.categoryName}</span>
               </TableCell>
-              <TableCell><Badge variant="secondary">{product.status}</Badge></TableCell>
               <TableCell>
+                <Badge variant="outline" className={getProductStatusBadgeClass(product.status)}>
+                  {formatProductStatus(product.status)}
+                </Badge>
+              </TableCell>
+              <TableCell className="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost">
@@ -149,19 +154,22 @@ export default function ProductTable({ link, filter, onPageChange, onLifecycleEv
         )}
       </TableBody>
       {showPagination && (
-        <TableFooter>
+        <TableFooter className="bg-transparent">
           <TableRow>
-            <TableCell colSpan={1} className="text-muted-foreground">
-              Showing {products.length} of {data?.page.totalElements} products
-            </TableCell>
-            <TableCell colSpan={3}>
-              {data?.page && (
-                <Pager
-                  className="justify-end"
-                  onPageChange={onPageChange}
-                  {...data?.page}
-                />
-              )}
+            <TableCell colSpan={4} >
+              <div className="flex w-full items-center justify-between py-3">
+                <span className="text-muted-foreground grow">
+                  Showing {data?.page ? data.page.number * data.page.size + 1 : 0} - {data?.page ? data.page.number * data.page.size + products.length : 0} of {data?.page?.totalElements} products
+                </span>
+                {data?.page && (
+                  <Pager
+                    className="justify-end"
+                    onPageChange={onPageChange}
+                    {...data?.page}
+                  />
+                )}
+              </div>
+
             </TableCell>
           </TableRow>
         </TableFooter>
