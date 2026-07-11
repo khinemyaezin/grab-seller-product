@@ -1,20 +1,20 @@
 
 import { useCategoryLeaveSearch } from "@/features/products/hooks/use-categories";
+import { useCatalogLink } from "@/features/products/hooks/use-root";
 import { Category } from "@/features/products/types";
 import { MagicSearch, DisplayItem } from "@khinemyaezin/seller-ui/components/magic-search";
 import { Input } from "@khinemyaezin/seller-ui/components/input";
 import { SearchIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ComponentPropsWithoutRef } from 'react';
-import { HateoasLink } from "@/types";
 
 export type CategoryPickerProps = {
-    link: HateoasLink
     onChange: (category: Category) => void;
     value: string;
 }
 
-export default function CategorySearch({ link, value, onChange, ...inputProps }: ComponentPropsWithoutRef<typeof Input> & CategoryPickerProps) {
+export default function CategorySearch({ value, onChange, ...inputProps }: ComponentPropsWithoutRef<typeof Input> & CategoryPickerProps) {
+    const link = useCatalogLink("searchCategoryLeaves");
     const [query, setQuery] = useState<string>(value);
     const { data, isLoading } = useCategoryLeaveSearch(link, query);
 
@@ -32,7 +32,7 @@ export default function CategorySearch({ link, value, onChange, ...inputProps }:
             items={items}
             onQueryChange={setQuery}
             onQueryClear={() => {
-                onChange({id:"",name:""});
+                onChange({ id: "", name: "" });
             }}
             onSelect={(item) => onChange({ id: item.id, name: item.name })}
             isLoading={isLoading}

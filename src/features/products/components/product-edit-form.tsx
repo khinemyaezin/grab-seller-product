@@ -1,28 +1,25 @@
 
-import { Button } from "@khinemyaezin/seller-ui/components/index"
+import { Button, ButtonStatus, Skeleton } from "@khinemyaezin/seller-ui/components/index"
 import { ButtonGroup } from "@khinemyaezin/seller-ui/components/button-group"
 import { Card, CardContent, CardFooter } from "@khinemyaezin/seller-ui/components/card"
 import { FormProvider, useForm, useWatch } from "react-hook-form"
 import ProductBasicFieldSet from "./product-basic-fieldset"
 import ProductVariationFieldSet from "./product-variation-fieldset"
-import { GetFullProductResponse, HateoasLink, ProductFormValue, UPDATE_INTENT, UpdateProductRequest } from "@/types"
 import { generateSlug } from "@/features/products/utils"
-import { useProductGet, useProductUpdateMutation } from "@/features/products/hooks/use-products"
+import { useProductGet, useProductUpdateMutation, useProductDeleteMutation, useProductRestoreMutation } from "@/features/products/hooks/use-products"
+import { useCatalogLink } from "@/features/products/hooks/use-root"
 import { getVariantName } from "@/features/products/adapters/variation-matrix"
-import { ApiError } from "@/features/products/api"
 import { isEqual } from "lodash"
-import { useMemo, useEffect } from "react"
-import { toast } from "sonner"
+import { useEffect, useMemo } from "react"
 import { Separator } from "@khinemyaezin/seller-ui/components/separator"
 import { resolveLink } from "@khinemyaezin/seller-api"
+import { ProductFormValue, UPDATE_INTENT, UpdateProductRequest, GetFullProductResponse, ProductLifecycleEvent } from "../types"
+import { ProductStatus } from "./product-status"
+import { Archive, RotateCcw } from "lucide-react"
 
 export type ProductEditFormProps = {
-    generateMatrixLink: HateoasLink,
-    variationTypeSearchLink: HateoasLink,
-    variationOptionSearchLink: HateoasLink,
-    categorySearchLink: HateoasLink,
-    getProductLink: HateoasLink,
-    productId: string
+    productId: string,
+    onLifecycleEvent?: (event: ProductLifecycleEvent) => void;
 }
 
 const DEFAULT_PRODUCT_FORM_VALUE: ProductFormValue = {
@@ -138,30 +135,37 @@ function transformProductToFormValue(apiData: GetFullProductResponse): ProductFo
         variationTypes: apiData.variantTypes.map((vt) => ({
             uuid: vt.typeId,
             name: vt.typeName,
-            options: vt.options.map((o) => ({
-                uuid: o.optionId,
-                name: o.optionName,
-            })),
+            options: [
+                ...vt.options.map((o) => ({
+                    uuid: o.optionId,
+                    name: o.optionName,
+                })),
+                { uuid: "", name: "" }
+            ]
         })),
     };
 }
 
 export default function ProductEditForm({
-    generateMatrixLink,
-    variationTypeSearchLink,
-    variationOptionSearchLink,
-    categorySearchLink,
-    getProductLink,
-    productId
+    productId,
+    onLifecycleEvent
 }: ProductEditFormProps) {
+    const getProductLink = useCatalogLink("getProduct");
     const form = useForm<ProductFormValue>({
         defaultValues: DEFAULT_PRODUCT_FORM_VALUE,
         mode: "onSubmit",
     });
     const { handleSubmit, control, reset, getFieldState, formState: { isDirty } } = form;
-    const { data: productData, isLoading: isProductLoading } = useProductGet(getProductLink, productId);
+    const { data: productData, isLoading: isProductLoading, refetch } = useProductGet(getProductLink, productId);
     const productUpdateLink = resolveLink(productData?._links, "update-product");
+    const productDeleteLink = resolveLink(productData?._links, "delete-product");
+    const productRestoreLink = resolveLink(productData?._links, "restore-product");
+    const productPublishLink = resolveLink(productData?._links, "publish-product")
+
     const updateProductMutation = useProductUpdateMutation();
+    const deleteProductMutation = useProductDeleteMutation();
+    const restoreProductMutation = useProductRestoreMutation();
+
     const watchedValues = useWatch({ control });
 
     const normalizedDefaults = useMemo(
@@ -177,13 +181,21 @@ export default function ProductEditForm({
     );
 
     useEffect(() => {
+        if (productData?.name) {
+            onLifecycleEvent?.({ type: "titleResolved", title: productData.name });
+        }
+    }, [productData?.name, onLifecycleEvent]);
+
+    useEffect(() => {
         if (productData) {
             const formValue = transformProductToFormValue(productData);
             reset(formValue);
         }
     }, [productData, reset]);
 
-    async function handleFormSubmit(values: ProductFormValue) {
+
+
+    function handleFormSubmit(values: ProductFormValue) {
         if (!productUpdateLink) return;
         const intent = determineUpdateIntent({
             hasVariationTypes: values.variationTypes.length > 0,
@@ -193,52 +205,152 @@ export default function ProductEditForm({
         });
 
         const payload = buildUpdatePayload(values, intent);
+        updateProductMutation.mutate(
+            { link: productUpdateLink, request: payload },
+            {
+                onSuccess: () => {
+                    onLifecycleEvent?.({ type: "updated" });
+                    refetch();
+                    updateProductMutation.reset();
+                },
+                onError: () => {
+                    onLifecycleEvent?.({ type: "updateFailed" });
+                    updateProductMutation.reset();
+                }
+            }
+        );
+    }
 
-        try {
-            await updateProductMutation.mutateAsync({ link: productUpdateLink, request: payload });
-            toast.success("Product updated successfully", { position: "top-center" });
-        } catch (error) {
-            console.error("Failed to update product:", (error as ApiError).data);
-        }
+    function handleArchive() {
+        if (!productDeleteLink) return;
+        deleteProductMutation.mutate(
+            { link: productDeleteLink },
+            {
+                onSuccess: () => { onLifecycleEvent?.({ type: "archived" }); deleteProductMutation.reset() },
+                onError: () => { onLifecycleEvent?.({ type: "archiveFailed" }); deleteProductMutation.reset() },
+            },
+        );
+    }
+
+    function handleOnRestore() {
+        if (!productRestoreLink) return;
+        restoreProductMutation.mutate(
+            { link: productRestoreLink },
+            {
+                onSuccess: () => { onLifecycleEvent?.({ type: "restored" }); restoreProductMutation.reset() },
+                onError: () => { onLifecycleEvent?.({ type: "restoreFailed" }); restoreProductMutation.reset() },
+            },
+        );
     }
 
     if (isProductLoading || !productData) {
         return (
-            <div className="container mx-auto max-w-xl">
-                <span className="text-muted">Loading product details...</span>
+            <div className="">
+                <div className="flex w-full flex-col gap-7">
+                    <div className="flex flex-col gap-3">
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-8 w-full" />
+                    </div>
+                    <div className="flex flex-col gap-3">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-8 w-full" />
+                    </div>
+                    <Skeleton className="h-8 w-24" />
+                </div>
             </div>
         );
     }
 
+    const actionButtons = [
+        {
+            show: productRestoreLink,
+            onClick: handleOnRestore,
+            mutation: restoreProductMutation,
+            variant: "secondary" as const,
+            pendingLabel: "Restoring",
+            successLabel: "Restored",
+            label: "Restore",
+            Icon: RotateCcw
+        },
+        {
+            show: productDeleteLink,
+            onClick: handleArchive,
+            mutation: deleteProductMutation,
+            variant: "destructive" as const,
+            pendingLabel: "Archiving",
+            successLabel: "Archived",
+            label: "Archive",
+            Icon: Archive
+        }
+    ].reduce<React.ReactNode[]>((acc, btn, index) => {
+        if (btn.show) {
+            acc.push(
+                <Button
+                    key={index}
+                    type="button"
+                    variant={btn.variant}
+                    disabled={btn.mutation.isPending || btn.mutation.isSuccess}
+                    onClick={btn.onClick}>
+                    <ButtonStatus
+                        status={
+                            btn.mutation.isPending
+                                ? "pending"
+                                : btn.mutation.isSuccess
+                                    ? "success"
+                                    : "idle"
+                        }
+                        pendingLabel={btn.pendingLabel}
+                        successLabel={btn.successLabel}>
+                        <btn.Icon className="mr-1 h-4 w-4" />
+                        {btn.label}
+                    </ButtonStatus>
+                </Button>
+            );
+        }
+        return acc;
+    }, []);
+
     return (
         <FormProvider {...form}>
-            <form onSubmit={handleSubmit(handleFormSubmit)} className="grid gap-6">
-                <Card>
+            <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col md:flex-row gap-6 items-start">
+                <Card className="w-full md:w-[60%]">
                     <CardContent>
-                        <ProductBasicFieldSet
-                            searchCategoryLink={categorySearchLink}
-                        />
+                        <ProductBasicFieldSet />
                         <Separator className="my-6" />
-                        <ProductVariationFieldSet
-                            generateMatrixLink={generateMatrixLink}
-                            variationTypeSearchLink={variationTypeSearchLink}
-                            variationOptionSearchLink={variationOptionSearchLink}
-                        />
+                        <ProductVariationFieldSet />
                     </CardContent>
-                    {isFormDirty && (
-                        <CardFooter className="flex justify-end border-t">
+                    <CardFooter className="flex justify-end">
+                        <ButtonGroup>
                             <ButtonGroup>
-                                <ButtonGroup>
-
-                                    <Button type="submit" disabled={updateProductMutation.isPending}>
-                                        {updateProductMutation.isPending ? "Saving..." : "Save Changes"}
-                                    </Button>
-
-                                </ButtonGroup>
+                                {actionButtons}
                             </ButtonGroup>
-                        </CardFooter>
-                    )}
+                            {isFormDirty && (
+                                <ButtonGroup>
+                                    <Button type="submit" disabled={updateProductMutation.isPending || updateProductMutation.isSuccess}>
+                                        <ButtonStatus
+                                            status={
+                                                updateProductMutation.isPending
+                                                    ? "pending"
+                                                    : updateProductMutation.isSuccess
+                                                        ? "success"
+                                                        : "idle"
+                                            }
+                                            pendingLabel="Saving…"
+                                            successLabel="Saved">
+                                            Save
+                                        </ButtonStatus>
+                                    </Button>
+                                </ButtonGroup>
+                            )}
+                        </ButtonGroup>
+                    </CardFooter>
                 </Card>
+                <div className="flex w-full md:flex-1 flex-col gap-6">
+                    <ProductStatus
+                        status={productData.status}
+                        link={productPublishLink}
+                        onLifecycleEvent={onLifecycleEvent} />
+                </div>
             </form>
 
         </FormProvider>

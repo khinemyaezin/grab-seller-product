@@ -1,7 +1,3 @@
-// ---------------------------------------------------------------------------
-// Variation Matrix Request Types
-// ---------------------------------------------------------------------------
-
 export type VariationMatrixRequestVariation = {
   typeId: string;
   optionId: string;
@@ -19,10 +15,6 @@ export type VariationMatrixRequest = {
     variations: VariationMatrixRequestVariation[];
   }[];
 };
-
-// ---------------------------------------------------------------------------
-// Create Product
-// ---------------------------------------------------------------------------
 
 export type CreateProductRequestVariation = {
   typeId: string;
@@ -49,10 +41,6 @@ export type CreateProductRequest = {
   product: CreateProductRequestProduct;
   variantTypes: CreateProductRequestVariationType[];
 };
-
-// ---------------------------------------------------------------------------
-// Update Product
-// ---------------------------------------------------------------------------
 
 export type UPDATE_INTENT = "LEAVE_AS_IS" | "FULL_SYNC" | "COLLAPSE_TO_STANDALONE";
 

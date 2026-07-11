@@ -1,0 +1,9 @@
+/* Standalone dev mode — includes full Tailwind (theme + preflight + base + utilities).
+   This file is only imported by main.tsx for standalone development.
+   When loaded inside the host via Module Federation, the exposed Routes
+   component imports styles.css instead (which omits preflight/base). */
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@khinemyaezin/seller-ui/styles.css";
+@source "../node_modules/@khinemyaezin/seller-ui/dist";

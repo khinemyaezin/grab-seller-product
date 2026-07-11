@@ -6,27 +6,16 @@ import { Item, ItemActions, ItemContent, ItemTitle } from "@khinemyaezin/seller-
 import { useMatrixSync } from "@/features/products/hooks/use-matrix-sync";
 import type { ProductFormValue } from "@/features/products/types";
 import ProductStandaloneVariantField from "./product-standalone-field";
-import { HateoasLink } from "@/types";
 import { VariationTypeField } from "./product-variation-type-field";
 
-export type ProductVariaitonFieldSetProps = {
-    generateMatrixLink: HateoasLink,
-    variationTypeSearchLink: HateoasLink,
-    variationOptionSearchLink: HateoasLink
-}
-
-export default function ProductVariationFieldSet({
-    generateMatrixLink,
-    variationTypeSearchLink,
-    variationOptionSearchLink
-}: ProductVariaitonFieldSetProps) {
+export default function ProductVariationFieldSet() {
     const { control, getValues } = useFormContext<ProductFormValue>();
     const { fields, remove, append } = useFieldArray({
         control,
         name: "variationTypes"
     });
 
-    useMatrixSync(generateMatrixLink);
+    useMatrixSync();
 
     const handleAddType = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -58,13 +47,11 @@ export default function ProductVariationFieldSet({
                                 control={control}
                                 name={`variationTypes.${typeIndex}`}
                                 getValues={getValues}
-                                typeSearchlink={variationTypeSearchLink}
-                                optionSearchLink={variationOptionSearchLink}
                             />)}
                     </FieldGroup>
                 )}
-                <Item asChild size="sm" className="rounded-none">
-                    <a href="#" onClick={handleAddType}>
+                <Item asChild size="sm" className="rounded-none cursor-pointer hover:bg-muted transition-colors">
+                    <button type="button" onClick={handleAddType}>
                         <ItemActions>
                             <Plus />
                         </ItemActions>
@@ -73,7 +60,7 @@ export default function ProductVariationFieldSet({
                                 {fields.length == 0 ? "Add variation" : "Add another option"}
                             </ItemTitle>
                         </ItemContent>
-                    </a>
+                    </button>
                 </Item>
             </div>
             {fields.length !== 0 && (

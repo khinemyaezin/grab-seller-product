@@ -1,11 +1,9 @@
 
 import { Link } from "react-router";
-import { useEffect, useMemo, useState } from "react";
-import { routes } from "@khinemyaezin/seller-contracts";
-import { useProductSearch } from "@/features/products/hooks/use-products";
+import { useCallback, useMemo } from "react";
+import { useProductSearch, useProductDeleteMutation, useProductRestoreMutation } from "@/features/products/hooks/use-products";
 import { HateoasLink } from "@khinemyaezin/seller-api";
-import { GetFeaturedProductResponse, ProductFilterFormValue } from "@/features/products/types";
-import { PageInfo } from "@khinemyaezin/seller-api";
+import { GetFeaturedProductResponse, ProductFilterFormValue, ProductLifecycleEvent } from "@/features/products/types";
 import { Pager } from "@khinemyaezin/seller-ui/components/pager";
 import {
   Table,
@@ -16,17 +14,11 @@ import {
   TableHeader,
   TableRow,
 } from "@khinemyaezin/seller-ui/components/table";
-import { Button } from "@khinemyaezin/seller-ui/components/index";
+import { Badge, Button } from "@khinemyaezin/seller-ui/components/index";
 import { DropdownMenuTrigger, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenu } from "@khinemyaezin/seller-ui/components/dropdown-menu";
-import { hasLink } from "@khinemyaezin/seller-api";
-import { Ellipsis } from "lucide-react";
-
-const DEFAULT_PAGE_INFO: PageInfo = {
-  number: 0,
-  size: 10,
-  totalElements: 0,
-  totalPages: 0,
-};
+import { hasLink, resolveLink } from "@khinemyaezin/seller-api";
+import { Ellipsis, ImageIcon } from "lucide-react";
+import { formatProductStatus, getProductStatusBadgeClass } from "./product-status";
 
 type FeatureProduct = {
   productId: string;
@@ -41,6 +33,7 @@ export type ProductTableProps = {
   link: HateoasLink;
   filter: ProductFilterFormValue;
   onPageChange?: (page: number) => void;
+  onLifecycleEvent?: (event: ProductLifecycleEvent) => void;
 };
 
 function transformToProducts(data?: GetFeaturedProductResponse): FeatureProduct[] {
@@ -54,23 +47,45 @@ function transformToProducts(data?: GetFeaturedProductResponse): FeatureProduct[
   })) : [];
 }
 
-export default function ProductTable({ link, filter, onPageChange }: ProductTableProps) {
+export default function ProductTable({ link, filter, onPageChange, onLifecycleEvent }: ProductTableProps) {
   const { data } = useProductSearch(link, filter);
-  const [showPagination, setShowPagination] = useState<boolean>(false);
+  const deleteProductMutation = useProductDeleteMutation();
+  const restoreProductMutation = useProductRestoreMutation();
   const products = useMemo(() => transformToProducts(data), [data]);
 
-  useEffect(() => {
-    if (data) {
-      setShowPagination(data.page.totalPages > 1)
-    }
-  },
-    [data, filter]);
+  const handleArchive = useCallback(
+    (deleteLink: HateoasLink, name: string) => {
+      deleteProductMutation.mutate(
+        { link: deleteLink },
+        {
+          onSuccess: () => onLifecycleEvent?.({ type: "archived", name }),
+          onError: () => onLifecycleEvent?.({ type: "archiveFailed", name }),
+        },
+      );
+    },
+    [deleteProductMutation, onLifecycleEvent],
+  );
+
+  const handleOnRestore = useCallback(
+    (link: HateoasLink) => {
+      restoreProductMutation.mutate(
+        { link: link },
+        {
+          onSuccess: () => onLifecycleEvent?.({ type: "restored" }),
+          onError: () => onLifecycleEvent?.({ type: "restoreFailed" }),
+        },
+      );
+    },
+    [restoreProductMutation, onLifecycleEvent],
+  );
+
+  const showPagination = (data?.page.totalPages ?? 0) > 1
   return (
     <Table>
       <TableHeader>
         <TableRow>
+          <TableHead className="w-[48px]"></TableHead>
           <TableHead>Product</TableHead>
-          <TableHead>Category</TableHead>
           <TableHead>Status</TableHead>
           <TableHead></TableHead>
         </TableRow>
@@ -79,16 +94,24 @@ export default function ProductTable({ link, filter, onPageChange }: ProductTabl
         {products.length > 0 ? (
           products.map((product) => (
             <TableRow key={product.productId}>
-              <TableCell className="font-medium">
-                {product.name}
-              </TableCell>
-              <TableCell>{product.categoryName}</TableCell>
-              <TableCell>{product.status}</TableCell>
               <TableCell>
-
+                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-secondary">
+                  <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                </div>
+              </TableCell>
+              <TableCell className="grid grid-rows-2 gap-1">
+                <span className="font-medium">{product.name}</span>
+                <span className="font-normal text-muted-foreground">{product.categoryName}</span>
+              </TableCell>
+              <TableCell>
+                <Badge variant="outline" className={getProductStatusBadgeClass(product.status)}>
+                  {formatProductStatus(product.status)}
+                </Badge>
+              </TableCell>
+              <TableCell className="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon-xs">
+                    <Button variant="ghost">
                       <Ellipsis />
                     </Button>
                   </DropdownMenuTrigger>
@@ -96,7 +119,23 @@ export default function ProductTable({ link, filter, onPageChange }: ProductTabl
                     <DropdownMenuGroup>
                       {hasLink(product._links, "update-product") && (
                         <DropdownMenuItem asChild>
-                          <Link to={routes.editProduct(product.productId)}>Edit</Link>
+                          <Link to={product.productId}>Edit</Link>
+                        </DropdownMenuItem>
+                      )}
+
+                      {resolveLink(product._links, "delete-product") && (
+                        <DropdownMenuItem variant="destructive"
+                          disabled={deleteProductMutation.isPending}
+                          onClick={() => handleArchive(resolveLink(product._links, "delete-product")!, product.name)}>
+                          Archive
+                        </DropdownMenuItem>
+                      )}
+
+                      {hasLink(product._links, "restore-product") && (
+                        <DropdownMenuItem
+                          disabled={restoreProductMutation.isPending}
+                          onClick={() => handleOnRestore(resolveLink(product._links, "restore-product")!)}>
+                          Restore
                         </DropdownMenuItem>
                       )}
 
@@ -108,26 +147,29 @@ export default function ProductTable({ link, filter, onPageChange }: ProductTabl
           ))
         ) : (
           <TableRow>
-            <TableCell colSpan={3} className="text-muted-foreground pointer-events-none text-center">
+            <TableCell colSpan={4} className="text-muted-foreground pointer-events-none text-center">
               No record found.
             </TableCell>
           </TableRow>
         )}
       </TableBody>
       {showPagination && (
-        <TableFooter>
+        <TableFooter className="bg-transparent">
           <TableRow>
-            <TableCell colSpan={1} className="text-muted-foreground">
-              Showing {products.length} of {data?.page.totalElements} products
-            </TableCell>
-            <TableCell colSpan={2}>
-              {data?.page && (
-                <Pager
-                  className="justify-end"
-                  onPageChange={onPageChange}
-                  {...data?.page}
-                />
-              )}
+            <TableCell colSpan={4} >
+              <div className="flex w-full items-center justify-between py-3">
+                <span className="text-muted-foreground grow">
+                  Showing {data?.page ? data.page.number * data.page.size + 1 : 0} - {data?.page ? data.page.number * data.page.size + products.length : 0} of {data?.page?.totalElements} products
+                </span>
+                {data?.page && (
+                  <Pager
+                    className="justify-end"
+                    onPageChange={onPageChange}
+                    {...data?.page}
+                  />
+                )}
+              </div>
+
             </TableCell>
           </TableRow>
         </TableFooter>

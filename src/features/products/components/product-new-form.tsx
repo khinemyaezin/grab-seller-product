@@ -1,22 +1,20 @@
-import { CreateProductRequest, HateoasLink, ProductFormValue } from "@/types";
 import { FormProvider, useForm } from "react-hook-form"
 import ProductBasicFieldSet from "./product-basic-fieldset";
 import ProductVariationFieldSet from "./product-variation-fieldset";
 import { generateSlug } from "@/features/products/utils";
 import { useProductMutation } from "@/features/products/hooks/use-products";
+import { useCatalogLink } from "@/features/products/hooks/use-root";
 import { Card, CardContent, CardFooter } from "@khinemyaezin/seller-ui/components/card";
-import { FieldSeparator } from "@khinemyaezin/seller-ui/components/field";
 import { Separator } from "@khinemyaezin/seller-ui/components/separator";
-import { Button } from "@khinemyaezin/seller-ui/components/index";
+import { Button, ButtonStatus } from "@khinemyaezin/seller-ui/components/index";
 import { ButtonGroup } from "@khinemyaezin/seller-ui/components/button-group";
+import { ProductFormValue, CreateProductRequest } from "../types";
+
+import type { ProductLifecycleEvent } from "../types";
 
 export type ProductNewFormProps = {
-    generateMatrixLink: HateoasLink,
-    variationTypeSearchLink: HateoasLink,
-    variationOptionSearchLink: HateoasLink,
-    categorySearchLink: HateoasLink,
-    createProductLink: HateoasLink
-}
+    onLifecycleEvent?: (event: ProductLifecycleEvent) => void;
+};
 
 const DEFAULT_PRODUCT_FORM_VALUE: ProductFormValue = {
     product: {
@@ -63,13 +61,8 @@ function buildCreatePayload(values: ProductFormValue): CreateProductRequest {
     };
 }
 
-export default function ProductNewForm({
-    generateMatrixLink,
-    variationTypeSearchLink,
-    variationOptionSearchLink,
-    categorySearchLink,
-    createProductLink
-}: ProductNewFormProps) {
+export default function ProductNewForm({ onLifecycleEvent }: ProductNewFormProps) {
+    const createProductLink = useCatalogLink("createProduct");
     const form = useForm<ProductFormValue>({
         defaultValues: DEFAULT_PRODUCT_FORM_VALUE,
         mode: "onSubmit"
@@ -79,12 +72,26 @@ export default function ProductNewForm({
 
     const createProductApi = useProductMutation();
 
-    const handleFormSubmit = async (values: ProductFormValue) => {
+
+
+    const handleFormSubmit = (values: ProductFormValue) => {
+        if (!createProductLink) return;
         const payload = buildCreatePayload(values);
-        try {
-            await createProductApi.mutateAsync({ link: createProductLink, request: payload });
-        } catch {
-        }
+        createProductApi.mutate(
+            { link: createProductLink, request: payload },
+            {
+                onSuccess: () => {
+                    onLifecycleEvent?.({ type: "created" });
+                    createProductApi.reset();
+                    reset();
+                },
+                onError: (error) => {
+                    console.error("Failed to create product:", error);
+                    onLifecycleEvent?.({ type: "createFailed" });
+                    createProductApi.reset();
+                }
+            }
+        );
     }
 
     return (
@@ -92,23 +99,29 @@ export default function ProductNewForm({
             <form onSubmit={handleSubmit(handleFormSubmit)} className="grid gap-6">
                 <Card>
                     <CardContent>
-                        <ProductBasicFieldSet
-                            searchCategoryLink={categorySearchLink}
-                        />
+                        <ProductBasicFieldSet />
                         <Separator className="my-6" />
-                        <ProductVariationFieldSet
-                            generateMatrixLink={generateMatrixLink}
-                            variationTypeSearchLink={variationTypeSearchLink}
-                            variationOptionSearchLink={variationOptionSearchLink}
-                        />
+                        <ProductVariationFieldSet />
                     </CardContent>
                     {isDirty && (
-                        <CardFooter className="flex justify-end border-t">
+                        <CardFooter className="flex justify-end">
                             <ButtonGroup>
                                 <ButtonGroup>
 
                                     <Button type="submit" disabled={createProductApi.isPending}>
-                                        {createProductApi.isPending ? "Saving..." : "Save Changes"}
+                                        <ButtonStatus status={
+                                            createProductApi.isPending
+                                                ? "pending"
+                                                : createProductApi.isSuccess
+                                                    ? "success"
+                                                    : createProductApi.isError
+                                                        ? "failed"
+                                                        : "idle"
+                                        }
+                                            pendingLabel="Saving…"
+                                            successLabel="Saved">
+                                            Save
+                                        </ButtonStatus>
                                     </Button>
 
                                 </ButtonGroup>

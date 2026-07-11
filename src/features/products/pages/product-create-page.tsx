@@ -3,37 +3,45 @@ import ProductNewForm from "@/features/products/components/product-new-form";
 import { Header } from "@khinemyaezin/seller-ui/layout/header";
 import { Button } from "@khinemyaezin/seller-ui/components/index";
 import { ButtonGroup } from "@khinemyaezin/seller-ui/components/button-group";
-import { routes } from "@khinemyaezin/seller-contracts";
-import { useCatalogRoot } from "@/features/products/hooks/use-catalog-root";
+import { usePlatform } from "@khinemyaezin/seller-ui";
+import { useCatalogLink } from "@/features/products/hooks/use-root";
 import { ArrowLeftIcon } from "lucide-react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import type { ProductLifecycleEvent } from "@/features/products/types";
 
 export default function NewProductPage() {
-    const { data } = useCatalogRoot();
+    const canCreate = !!useCatalogLink("createProduct");
+    const platform = usePlatform();
+    const navigate = useNavigate();
+
+    const toast = (type: "success" | "error", message: string) =>
+        platform?.events.publish("shell:toast:v1", { type, message, position: "top-center" });
+
+    const handleEvent = (event: ProductLifecycleEvent) => {
+        switch (event.type) {
+            case "created": toast("success", "Product created successfully"); break;
+            case "createFailed": toast("error", "Failed to create product"); break;
+        }
+    };
 
     return (
-        <div className="container mx-auto max-w-xl">
+        <div className="container mx-auto max-w-xl p-6">
             <Header
                 title="Add Product"
-                description="Create a new warehouse, store, or distribution center."
+                description="Add a new product to your seller catalog."
             >
                 <ButtonGroup>
-                    <Button type="button" variant="secondary">
-                        <Link to={routes.products} className="flex gap-2 items-center">
+                    <Button type="button" variant="secondary" asChild>
+                        <Link to="..">
                             <ArrowLeftIcon />
-                            <span>Back to Products</span>
                         </Link>
                     </Button>
-
                 </ButtonGroup>
             </Header>
-            {data?.generateVariationMatrix && data.searchVariantTypes && data.searchVariantOptions && data.searchCategoryLeaves && data.createProduct && (
+            {canCreate && (
                 <ProductNewForm
-                    generateMatrixLink={data.generateVariationMatrix}
-                    variationTypeSearchLink={data.searchVariantTypes}
-                    variationOptionSearchLink={data.searchVariantOptions}
-                    categorySearchLink={data.searchCategoryLeaves}
-                    createProductLink={data.createProduct} />
+                    onLifecycleEvent={handleEvent}
+                />
             )}
         </div>
     );

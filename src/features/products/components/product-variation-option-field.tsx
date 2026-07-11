@@ -1,6 +1,7 @@
 
 import type { GetVariationOptionResult, VariationOption, ProductFormValue } from "@/features/products/types";
 import { useVariationOptionSearch } from "@/features/products/hooks/use-option";
+import { useCatalogLink } from "@/features/products/hooks/use-root";
 import { useController, UseControllerProps, UseFormGetValues } from "react-hook-form";
 import { SearchIcon, Trash } from "lucide-react";
 import { useState } from "react";
@@ -9,30 +10,32 @@ import { Button } from "@khinemyaezin/seller-ui/components/index";
 import { ButtonGroup } from "@khinemyaezin/seller-ui/components/button-group";
 import { Field, FieldError } from "@khinemyaezin/seller-ui/components/field";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@khinemyaezin/seller-ui/components/input-group";
-import { HateoasLink } from "@/types";
 
 interface VariationOptionItemProps {
-    link: HateoasLink;
     index: number;
     typeIndex: number
     getValues: UseFormGetValues<ProductFormValue>
     onRemove: () => void;
     showTrash: boolean;
+    onSelectOption: () => void;
+    onClearOption?: () => void;
 }
 
 export function VariationOptionField({
-    link,
     typeIndex,
     index,
     onRemove,
     getValues,
-    showTrash
+    showTrash,
+    onSelectOption,
+    onClearOption
 }: UseControllerProps<ProductFormValue> & VariationOptionItemProps) {
+    const link = useCatalogLink("searchVariantOptions");
     const { field, fieldState } = useController({
         name: `variationTypes.${typeIndex}.options.${index}`,
         rules: {
             validate: (value) => {
-                const allOptions = getValues(`variationTypes.${typeIndex}.options`);
+                const allOptions = getValues(`variationTypes.${typeIndex}.options`) ?? [];
                 const isLastOption = index === allOptions.length - 1;
 
                 if (isLastOption && !value?.uuid && allOptions.length > 1) {
@@ -42,9 +45,10 @@ export function VariationOptionField({
             },
         }
     })
+
     const type = getValues(`variationTypes.${typeIndex}`);
     const [query, setQuery] = useState<string>(field.value?.name);
-    const { data } = useVariationOptionSearch(link, query, type.uuid);
+    const { data } = useVariationOptionSearch(link, query, type?.uuid ?? "");
 
     const getFilteredItems = (response: GetVariationOptionResult): DisplayItem[] => {
         const data: VariationOption[] = response.options.map(t => ({
@@ -52,11 +56,11 @@ export function VariationOptionField({
             name: t.name,
         }));
 
-        const options = getValues(`variationTypes.${typeIndex}.options`);
-        const existingOptionsIds = new Set(options.map((option) => option.uuid));
+        const options = getValues(`variationTypes.${typeIndex}.options`) ?? [];
+        const existingOptionsIds = new Set(options.map((option) => option?.uuid));
 
         return (data || [])
-            .filter((option) => !existingOptionsIds.has(option.uuid) || option.uuid === options[index].uuid)
+            .filter((option) => !existingOptionsIds.has(option.uuid) || option.uuid === field.value?.uuid)
             .map(option => ({ id: option.uuid, name: option.name }));
     };
 
@@ -67,8 +71,13 @@ export function VariationOptionField({
                     initialQuery={field.value?.name}
                     items={data ? getFilteredItems(data) : []}
                     onQueryChange={setQuery}
+                    onQueryClear={() => {
+                        field.onChange({ ...field.value, uuid: "", name: "" });
+                        onClearOption?.();
+                    }}
                     onSelect={(item) => {
-                        field.onChange({ ...field.value, uuid: item.id, name: item.name })
+                        field.onChange({ ...field.value, uuid: item.id, name: item.name });
+                        onSelectOption();
                     }}
                     renderInput={(props) => (
                         <InputGroup>
