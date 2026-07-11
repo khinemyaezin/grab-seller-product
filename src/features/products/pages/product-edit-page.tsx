@@ -36,7 +36,7 @@ export default function EditProductPage() {
     <div className="container mx-auto max-w-xl p-6">
       <Header
         title="Edit Product"
-        description="Create a new warehouse, store, or distribution center."
+        description="Update your product details."
       >
         <ButtonGroup>
           <Button type="button" variant="secondary" asChild>

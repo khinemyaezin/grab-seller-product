@@ -1,4 +1,4 @@
-import type { PageInfo, HateoasLink, HateoasPageMetadata } from "@khinemyaezin/seller-api";
+import type { HateoasLink, HateoasPageMetadata } from "@khinemyaezin/seller-api";
 import type { CategoryLeaf } from "./catalog.model";
 
 export interface CatalogRoot {

@@ -63,3 +63,5 @@ export type ProductLifecycleEvent =
   | { type: "archiveFailed"; name?: string }
   | { type: "restored" }
   | { type: "restoreFailed" };
+
+export type ProductStatus = | "DRAFT" | "ACTIVE" | "ARCHIVED" | "SUSPENDED";

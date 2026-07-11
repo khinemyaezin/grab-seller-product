@@ -9,7 +9,6 @@ import { Separator } from "@khinemyaezin/seller-ui/components/separator";
 import { Button, ButtonStatus } from "@khinemyaezin/seller-ui/components/index";
 import { ButtonGroup } from "@khinemyaezin/seller-ui/components/button-group";
 import { ProductFormValue, CreateProductRequest } from "../types";
-import { useEffect } from "react";
 
 import type { ProductLifecycleEvent } from "../types";
 
@@ -73,35 +72,26 @@ export default function ProductNewForm({ onLifecycleEvent }: ProductNewFormProps
 
     const createProductApi = useProductMutation();
 
-    useEffect(() => {
-        if (createProductApi.isSuccess) {
-            onLifecycleEvent?.({ type: "created" });
-            const timer = setTimeout(() => {
-                createProductApi.reset();
-                reset();
-            }, 900);
-            return () => clearTimeout(timer);
-        }
-    }, [createProductApi.isSuccess, createProductApi, reset, onLifecycleEvent]);
 
-    useEffect(() => {
-        if (createProductApi.isError) {
-            onLifecycleEvent?.({ type: "createFailed" });
-            const timer = setTimeout(() => {
-                createProductApi.reset();
-            }, 3000);
-            return () => clearTimeout(timer);
-        }
-    }, [createProductApi.isError, createProductApi, onLifecycleEvent]);
 
-    const handleFormSubmit = async (values: ProductFormValue) => {
+    const handleFormSubmit = (values: ProductFormValue) => {
         if (!createProductLink) return;
         const payload = buildCreatePayload(values);
-        try {
-            await createProductApi.mutateAsync({ link: createProductLink, request: payload });
-        } catch (error) {
-            console.error("Failed to create product:", error);
-        }
+        createProductApi.mutate(
+            { link: createProductLink, request: payload },
+            {
+                onSuccess: () => {
+                    onLifecycleEvent?.({ type: "created" });
+                    createProductApi.reset();
+                    reset();
+                },
+                onError: (error) => {
+                    console.error("Failed to create product:", error);
+                    onLifecycleEvent?.({ type: "createFailed" });
+                    createProductApi.reset();
+                }
+            }
+        );
     }
 
     return (

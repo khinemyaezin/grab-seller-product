@@ -16,6 +16,8 @@ export default function AdminProductsPage() {
     switch (event.type) {
       case "archived": toast("success", `${event.name} archived`); break;
       case "archiveFailed": toast("error", `Failed to archive ${event.name}`); break;
+      case "restored": toast("success", "Product restored successfully"); break;
+      case "restoreFailed": toast("error", "Failed to restore product"); break;
     }
   };
 

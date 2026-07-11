@@ -188,26 +188,7 @@ export default function ProductEditForm({
         }
     }, [productData, reset]);
 
-    useEffect(() => {
-        if (updateProductMutation.isSuccess) {
-            onLifecycleEvent?.({ type: "updated" });
-            const timer = setTimeout(() => {
-                refetch();
-                updateProductMutation.reset();
-            }, 900);
-            return () => clearTimeout(timer);
-        }
-    }, [updateProductMutation.isSuccess, refetch, updateProductMutation, onLifecycleEvent]);
 
-    useEffect(() => {
-        if (updateProductMutation.isError) {
-            onLifecycleEvent?.({ type: "updateFailed" });
-            const timer = setTimeout(() => {
-                updateProductMutation.reset();
-            }, 3000);
-            return () => clearTimeout(timer);
-        }
-    }, [updateProductMutation.isError, updateProductMutation, onLifecycleEvent]);
 
     function handleFormSubmit(values: ProductFormValue) {
         if (!productUpdateLink) return;
@@ -219,12 +200,20 @@ export default function ProductEditForm({
         });
 
         const payload = buildUpdatePayload(values, intent);
-
-        try {
-            updateProductMutation.mutateAsync({ link: productUpdateLink, request: payload });
-        } catch (error) {
-            console.error("Failed to update product:", (error as ApiError).data);
-        }
+        updateProductMutation.mutate(
+            { link: productUpdateLink, request: payload },
+            {
+                onSuccess: () => {
+                    onLifecycleEvent?.({ type: "updated" });
+                    refetch();
+                    updateProductMutation.reset();
+                },
+                onError: () => {
+                    onLifecycleEvent?.({ type: "updateFailed" });
+                    updateProductMutation.reset();
+                }
+            }
+        );
     }
 
     function handleArchive() {
@@ -283,7 +272,7 @@ export default function ProductEditForm({
                                     <Button
                                         type="button"
                                         variant="secondary"
-                                        disabled={restoreProductMutation.isPending|| restoreProductMutation.isSuccess}
+                                        disabled={restoreProductMutation.isPending || restoreProductMutation.isSuccess}
                                         onClick={handleOnRestore}>
                                         <ButtonStatus
                                             status={

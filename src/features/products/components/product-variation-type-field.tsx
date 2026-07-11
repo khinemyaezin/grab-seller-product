@@ -75,8 +75,6 @@ export function VariationTypeField({
         }
     }, [watchedType])
 
-    // Guard positional lookups: after reset() shrinks variationTypes, this row can render
-    // one cycle with an index past the new array length.
     const getFilteredItems = (response: GetVariationTypeResult) => {
         const data: VariationType[] = response.types.map(t => ({
             uuid: t.id,
