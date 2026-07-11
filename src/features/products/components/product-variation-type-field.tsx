@@ -9,7 +9,7 @@ import { VariationOptionField } from "./product-variation-option-field";
 import { SearchIcon, Trash } from "lucide-react";
 import type { ProductFormValue, VariationType, GetVariationTypeResult } from "@/features/products/types";
 import { MagicSearch } from "@khinemyaezin/seller-ui/components/magic-search";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@khinemyaezin/seller-ui/components/input-group";
 
 type VariationTypeRowProps = {
@@ -39,42 +39,6 @@ export function VariationTypeField({
         name: `variationTypes.${index}.options`
     });
 
-    const watchedOptions = useWatch({
-        control,
-        name: `variationTypes.${index}.options`
-    });
-
-    const watchedType = useWatch({
-        control,
-        name: `variationTypes.${index}`
-    })
-
-    useEffect(() => {
-        if (!watchedOptions || watchedOptions.length === 0) return;
-
-        const lastOption = watchedOptions[watchedOptions.length - 1];
-
-        if (lastOption?.uuid !== "") {
-            append({ uuid: "", name: "" }, { shouldFocus: false });
-        }
-
-        watchedOptions.forEach((option, optionIndex) => {
-            if (optionIndex !== watchedOptions.length - 1 && option?.uuid === "" && option?.name === "") {
-                remove(optionIndex);
-            }
-        });
-    }, [watchedOptions]);
-
-    useEffect(() => {
-        if (!watchedType) return;
-        if (watchedType.uuid && watchedType.uuid !== "" && fields.length === 0) {
-            append({ uuid: "", name: "" });
-        }
-        if (watchedType.uuid == '' && fields.length > 0) {
-            remove();
-        }
-    }, [watchedType])
-
     const getFilteredItems = (response: GetVariationTypeResult) => {
         const data: VariationType[] = response.types.map(t => ({
             uuid: t.id,
@@ -101,9 +65,15 @@ export function VariationTypeField({
                     onQueryChange={setQuery}
                     onQueryClear={() => {
                         field.onChange({ ...field.value, uuid: "", name: "" });
+                        if (fields.length > 0) {
+                            remove();
+                        }
                     }}
                     onSelect={(item) => {
                         field.onChange({ ...field.value, uuid: item.id, name: item.name });
+                        if (fields.length === 0) {
+                            append({ uuid: "", name: "" });
+                        }
                     }}
                     renderInput={(props) => (
                         <InputGroup>
@@ -143,8 +113,19 @@ export function VariationTypeField({
                                 typeIndex={index}
                                 control={control}
                                 showTrash={optionIndex !== fields.length - 1}
-                                onRemove={() => remove(optionIndex)} name={"product"}
-                                getValues={getValues} />
+                                onRemove={() => remove(optionIndex)} 
+                                name={"product"}
+                                getValues={getValues}
+                                onSelectOption={() => {
+                                    if (optionIndex === fields.length - 1) {
+                                        append({ uuid: "", name: "" }, { shouldFocus: false });
+                                    }
+                                }}
+                                onClearOption={() => {
+                                    if (optionIndex !== fields.length - 1) {
+                                        remove(optionIndex);
+                                    }
+                                }} />
                         ))}
                     </FieldGroup>
                 </FieldSet>

@@ -17,6 +17,8 @@ interface VariationOptionItemProps {
     getValues: UseFormGetValues<ProductFormValue>
     onRemove: () => void;
     showTrash: boolean;
+    onSelectOption: () => void;
+    onClearOption?: () => void;
 }
 
 export function VariationOptionField({
@@ -24,7 +26,9 @@ export function VariationOptionField({
     index,
     onRemove,
     getValues,
-    showTrash
+    showTrash,
+    onSelectOption,
+    onClearOption
 }: UseControllerProps<ProductFormValue> & VariationOptionItemProps) {
     const link = useCatalogLink("searchVariantOptions");
     const { field, fieldState } = useController({
@@ -41,8 +45,7 @@ export function VariationOptionField({
             },
         }
     })
-    // Guard positional lookups: after reset() shrinks the form arrays (e.g. refetch following
-    // an archive), this row can render one cycle with an index past the new array length.
+
     const type = getValues(`variationTypes.${typeIndex}`);
     const [query, setQuery] = useState<string>(field.value?.name);
     const { data } = useVariationOptionSearch(link, query, type?.uuid ?? "");
@@ -53,8 +56,6 @@ export function VariationOptionField({
             name: t.name,
         }));
 
-        // Elements can be undefined too: rhf back-fills slots when a row registers
-        // at an index past the array reset() just shrank.
         const options = getValues(`variationTypes.${typeIndex}.options`) ?? [];
         const existingOptionsIds = new Set(options.map((option) => option?.uuid));
 
@@ -70,8 +71,13 @@ export function VariationOptionField({
                     initialQuery={field.value?.name}
                     items={data ? getFilteredItems(data) : []}
                     onQueryChange={setQuery}
+                    onQueryClear={() => {
+                        field.onChange({ ...field.value, uuid: "", name: "" });
+                        onClearOption?.();
+                    }}
                     onSelect={(item) => {
-                        field.onChange({ ...field.value, uuid: item.id, name: item.name })
+                        field.onChange({ ...field.value, uuid: item.id, name: item.name });
+                        onSelectOption();
                     }}
                     renderInput={(props) => (
                         <InputGroup>

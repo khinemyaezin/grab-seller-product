@@ -134,10 +134,13 @@ function transformProductToFormValue(apiData: GetFullProductResponse): ProductFo
         variationTypes: apiData.variantTypes.map((vt) => ({
             uuid: vt.typeId,
             name: vt.typeName,
-            options: vt.options.map((o) => ({
-                uuid: o.optionId,
-                name: o.optionName,
-            })),
+            options: [
+                ...vt.options.map((o) => ({
+                    uuid: o.optionId,
+                    name: o.optionName,
+                })),
+                { uuid: "", name: "" }
+            ]
         })),
     };
 }
