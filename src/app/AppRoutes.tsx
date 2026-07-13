@@ -1,4 +1,4 @@
-import { routes, SellerPlatform } from "@khinemyaezin/seller-contracts";
+import { SellerPlatform } from "@khinemyaezin/seller-contracts";
 import { HateoasLink } from "@khinemyaezin/seller-api";
 import { EntryLinkProvider, PlatformProvider, NotFoundPage } from "@khinemyaezin/seller-ui";
 import { Route, Routes } from "react-router";

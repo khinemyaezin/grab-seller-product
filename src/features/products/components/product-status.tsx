@@ -28,17 +28,17 @@ export function getProductStatusDescription(status: string): string {
     }
 }
 
-export function getProductStatusBadgeClass(status: string): string {
+export function getProductStatusBadgeClass(status: string): "success" | "warning" | "destructive" | "default" {
     switch (status) {
         case "ACTIVE":
-            return "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-300";
+            return "success";
         case "DRAFT":
-            return "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-300";
+            return "warning";
         case "ARCHIVED":
         case "SUSPENDED":
-            return "border-destructive/20 bg-destructive/10 text-destructive dark:border-destructive/30 dark:bg-destructive/20";
+            return "destructive";
         default:
-            return "";
+            return "default";
     }
 }
 
@@ -72,7 +72,7 @@ export function ProductStatus({ status, link, onLifecycleEvent }: ProductStatusS
             <CardHeader>
                 <div className="flex items-start justify-between gap-3">
                     <CardTitle>Status</CardTitle>
-                    <Badge variant="outline" className={getProductStatusBadgeClass(productStatus)}>
+                    <Badge variant={getProductStatusBadgeClass(productStatus)}>
                         {formatProductStatus(productStatus)}
                     </Badge>
                 </div>

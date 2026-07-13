@@ -1,15 +1,16 @@
 
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import { FormProvider, useController, UseControllerProps, useForm, useWatch } from "react-hook-form";
 import { SearchIcon, X } from "lucide-react";
 import type { ProductSearchCriteria } from "@/features/products/hooks/use-product-filter";
 import { useDebounce } from "@khinemyaezin/seller-ui";
+import { Field, FieldLabel } from "@khinemyaezin/seller-ui/components/field";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
-  InputGroupText,
 } from "@khinemyaezin/seller-ui/components/input-group";
 import {
   Select,
@@ -46,8 +47,17 @@ export default function ProductsFilter({ onChange }: ProductsFilterProps) {
     mode: "onChange",
     defaultValues: DEFAULT_FILTER,
   });
-  const { control, trigger } = form;
+  const { control, reset, trigger } = form;
+  const [resetCount, setResetCount] = useState(0);
   const watchedValues = useWatch({ control });
+  const hasActiveFilters =
+    Boolean(watchedValues.productName) ||
+    (watchedValues.productStatus !== null && watchedValues.productStatus !== undefined) ||
+    Number(watchedValues.size ?? DEFAULT_FILTER.size) !== DEFAULT_FILTER.size;
+  const resetFilter = () => {
+    reset(DEFAULT_FILTER);
+    setResetCount((count) => count + 1);
+  };
 
   useEffect(() => {
     let isSubscribed = true;
@@ -73,39 +83,86 @@ export default function ProductsFilter({ onChange }: ProductsFilterProps) {
 
   return (
     <FormProvider {...form}>
-      <InputGroup className="overflow-hidden">
-        <InputGroupAddon align="inline-start">
-          <SearchIcon className="text-muted-foreground" />
-        </InputGroupAddon>
-        <ProductNameInput control={control} name="productName" />
-        <InputGroupAddon align="inline-end">
-          <InputGroupText className="text-xs text-muted-foreground">Status</InputGroupText>
-          <ProductStatusSelect control={control} name="productStatus" productStatus={PRODUCT_STATUS} />
-        </InputGroupAddon>
-        <InputGroupAddon align="inline-end">
-          <InputGroupText className="text-xs text-muted-foreground">Page size</InputGroupText>
-          <SizeSelect control={control} name="size" pageSizes={PAGE_SIZES} />
-        </InputGroupAddon>
-      </InputGroup>
+      <form
+        className="flex w-full flex-col gap-3 rounded-md sm:flex-row sm:items-end sm:justify-between"
+        onSubmit={(event) => event.preventDefault()}
+      >
+        <div className="grid w-full gap-3 sm:grid-cols-[minmax(16rem,1fr)_minmax(10rem,13rem)_minmax(8rem,10rem)]">
+          <FilterField label="Search" htmlFor="product-name-filter">
+            <ProductNameInput
+              control={control}
+              name="productName"
+              inputId="product-name-filter"
+              resetCount={resetCount}
+            />
+          </FilterField>
+          <FilterField label="Status" htmlFor="product-status-filter">
+            <ProductStatusSelect
+              control={control}
+              name="productStatus"
+              productStatus={PRODUCT_STATUS}
+              triggerId="product-status-filter"
+            />
+          </FilterField>
+          <FilterField label="Rows" htmlFor="product-size-filter">
+            <SizeSelect control={control} name="size" pageSizes={PAGE_SIZES} triggerId="product-size-filter" />
+          </FilterField>
+        </div>
+      </form>
     </FormProvider>
   );
 }
 
-function ProductNameInput(props: UseControllerProps<FilterFormValue>) {
-  const { field } = useController(props);
+function FilterField({
+  label,
+  htmlFor,
+  children,
+}: {
+  label: string;
+  htmlFor: string;
+  children: ReactNode;
+}) {
+  return (
+    <Field className="gap-1.5">
+      <FieldLabel htmlFor={htmlFor} className="text-xs font-medium text-muted-foreground">{label}</FieldLabel>
+      {children}
+    </Field>
+  );
+}
+
+function ProductNameInput({
+  inputId,
+  resetCount,
+  ...controllerProps
+}: UseControllerProps<FilterFormValue, "productName"> & { inputId: string; resetCount: number }) {
+  const { field } = useController(controllerProps);
   const [query, setQuery] = useState(String(field.value ?? ""));
   const { debounceFn } = useDebounce((value: string) => field.onChange(value), 300);
+
+  useEffect(() => {
+    if (!field.value) {
+      setQuery("");
+    }
+  }, [field.value]);
+
+  useEffect(() => {
+    setQuery("");
+  }, [resetCount]);
 
   useEffect(() => {
     debounceFn(query);
   }, [debounceFn, query]);
 
   return (
-    <>
+    <InputGroup className="overflow-hidden">
+      <InputGroupAddon align="inline-start">
+        <SearchIcon className="text-muted-foreground" />
+      </InputGroupAddon>
       <InputGroupInput
+        id={inputId}
         value={query}
         onChange={(event) => setQuery(event.target.value)}
-        placeholder="Search and filter"
+        placeholder="Search products"
       />
 
       {query && (
@@ -120,17 +177,15 @@ function ProductNameInput(props: UseControllerProps<FilterFormValue>) {
           </InputGroupButton>
         </InputGroupAddon>
       )}
-      <InputGroupAddon align="inline-end">
-        <div className="h-4 w-[1px] bg-border shrink-0" />
-      </InputGroupAddon>
-    </>
+    </InputGroup>
   );
 }
 
 function SizeSelect({
   pageSizes,
+  triggerId,
   ...controllerProps
-}: UseControllerProps<FilterFormValue> & { pageSizes: number[] }) {
+}: UseControllerProps<FilterFormValue, "size"> & { pageSizes: number[]; triggerId: string }) {
   const { field } = useController(controllerProps);
 
   return (
@@ -138,7 +193,7 @@ function SizeSelect({
       value={String(field.value)}
       onValueChange={(value) => field.onChange(Number(value))}
     >
-      <SelectTrigger className="font-mono border-0 focus:ring-0 focus:ring-offset-0 bg-transparent h-full rounded-l-none text-muted-foreground text-xs justify-end gap-1 -mr-2">
+      <SelectTrigger id={triggerId} className="w-full">
         <SelectValue placeholder="Page size" />
       </SelectTrigger>
       <SelectContent align="start">
@@ -156,16 +211,17 @@ function SizeSelect({
 
 function ProductStatusSelect({
   productStatus,
+  triggerId,
   ...controllerProps
-}: UseControllerProps<FilterFormValue, "productStatus"> & { productStatus: ProductStatus[] }) {
+}: UseControllerProps<FilterFormValue, "productStatus"> & { productStatus: ProductStatus[]; triggerId: string }) {
   const { field } = useController(controllerProps);
 
   return (
     <Select
       value={field.value ?? "ALL"}
-      onValueChange={(value) => field.onChange(value === "ALL" ? null : value)}
+      onValueChange={(value) => field.onChange(value === "ALL" ? null : (value as ProductStatus))}
     >
-      <SelectTrigger className="border-0 focus:ring-0 focus:ring-offset-0 bg-transparent h-full rounded-none text-muted-foreground text-xs justify-end gap-1">
+      <SelectTrigger id={triggerId} className="w-full">
         <SelectValue placeholder="Status" />
       </SelectTrigger>
       <SelectContent align="start">
@@ -182,4 +238,3 @@ function ProductStatusSelect({
     </Select>
   );
 }
-

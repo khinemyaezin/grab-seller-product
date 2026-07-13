@@ -13,10 +13,11 @@ RUN cd grab-seller-product \
 
 FROM nginx:1.27-alpine AS runtime
 
-COPY grab-seller-product/nginx.conf /etc/nginx/conf.d/default.conf
+COPY grab-seller-product/nginx.conf /etc/nginx/templates/default.conf.template
 COPY --from=build /workspace/grab-seller-product/dist /usr/share/nginx/html
 
-EXPOSE 80
+ENV API_UPSTREAM=host.docker.internal:8080 \
+    NGINX_ENVSUBST_FILTER=API_UPSTREAM
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD wget -q --spider http://127.0.0.1/mf-manifest.json || exit 1
