@@ -104,7 +104,7 @@ export default function ProductTable({ link, filter, onPageChange, onLifecycleEv
                 <span className="font-normal text-muted-foreground">{product.categoryName}</span>
               </TableCell>
               <TableCell>
-                <Badge variant="outline" className={getProductStatusBadgeClass(product.status)}>
+                <Badge variant={getProductStatusBadgeClass(product.status)}>
                   {formatProductStatus(product.status)}
                 </Badge>
               </TableCell>

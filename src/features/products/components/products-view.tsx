@@ -20,17 +20,17 @@ export default function ProductsView({ link, canCreate, onLifecycleEvent }: Prod
 
   return (
     <Card className="gap-3">
-      <CardHeader className="gap-3">
+      <CardContent className="grid gap-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="w-full sm:flex-1">
         <ProductsFilter onChange={updateCriteria} />
-        <CardAction>
-          {canCreate && (
+          </div>
+           {canCreate && (
             <Button variant="outline" asChild>
               <Link to="new">Add product</Link>
             </Button>
           )}
-        </CardAction>
-      </CardHeader>
-      <CardContent className="grid gap-3">
+        </div>
         <ProductTable
           link={link}
           filter={filter}
