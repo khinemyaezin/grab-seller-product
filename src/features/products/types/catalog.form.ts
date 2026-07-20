@@ -6,7 +6,7 @@ export type ProductFormValue = {
 };
 
 export type ProductFilterFormValue = {
-  productName: string;
+  query: string;
   productStatus: ProductStatus | null;
   page: number;
   size: number;

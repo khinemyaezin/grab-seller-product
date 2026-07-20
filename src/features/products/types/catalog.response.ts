@@ -36,28 +36,20 @@ export type CreateProductResponse = {};
 
 export interface UpdateProductResponse { }
 
-export interface GetFeaturedProductResponse {
-  _embedded: {
-    productSummaryResponseList: {
-      id: string;
-      name: string;
-      status: string;
-      slug: string;
-      categoryName: string;
-      variant: {
-        available: boolean;
-        types: {
-          typeId: string;
-          typeName: string;
-          options: {
-            optionId: string;
-            optionName: string;
-          }[];
-        }[];
-      };
-      _links?: Record<string, HateoasLink>;
-    }[]
-  }
+export interface ProductResponse {
+  productId: string,
+  productName: string,
+  status: string,
+  slug: string,
+  categoryName: string,
+  categoryId: string,
+  _links?: Record<string, HateoasLink>;
+}
+
+export interface ProductSearchResponse {
+  _embedded?: {
+    productSearchResponseList: ProductResponse[];
+  };
   _links?: Record<string, HateoasLink>;
   page: HateoasPageMetadata;
 }

@@ -2,8 +2,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { catalogService } from "@/features/products/api";
 import type { HateoasLink } from "@khinemyaezin/seller-api";
-import type { CreateProductRequest, GetFullProductResponse, GetFeaturedProductRequest, GetFeaturedProductResponse, UpdateProductRequest, UpdateProductResponse, ProductModerationResponse, DeleteProductResponse } from "@/features/products/types";
+import type { CreateProductRequest, GetFullProductResponse, UpdateProductRequest, UpdateProductResponse, ProductModerationResponse, DeleteProductResponse, ProductFilterFormValue } from "@/features/products/types";
 import { resolveUrlTemplate } from "@khinemyaezin/seller-api";
+import { ProductSearchRequest } from "../types/catalog.request";
+import { ProductSearchResponse } from "../types/catalog.response";
 
 
 export function useProductMutation() {
@@ -52,10 +54,14 @@ export function useProductRestoreMutation() {
   });
 }
 
-export function useProductSearch(productsLink?: HateoasLink, filters?: GetFeaturedProductRequest) {
-  return useQuery<GetFeaturedProductResponse>({
+export function useProductSearch(productsLink: HateoasLink, filters: ProductFilterFormValue) {
+  const request: ProductSearchRequest = {
+    ...filters,
+    productStatus: filters.productStatus || undefined,
+  };
+  return useQuery<ProductSearchResponse>({
     queryKey: ["products", "search", productsLink?.href, filters],
-    queryFn: async () => catalogService.searchProducts(productsLink!, filters!),
+    queryFn: async () => catalogService.searchProducts(productsLink!, request),
     enabled: !!productsLink,
     placeholderData: (previousData) => previousData,
     staleTime: 5 * 60 * 1000,

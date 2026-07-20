@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { useCallback, useMemo } from "react";
 import { useProductSearch, useProductDeleteMutation, useProductRestoreMutation } from "@/features/products/hooks/use-products";
 import { HateoasLink } from "@khinemyaezin/seller-api";
-import { GetFeaturedProductResponse, ProductFilterFormValue, ProductLifecycleEvent } from "@/features/products/types";
+import { ProductFilterFormValue, ProductLifecycleEvent, ProductSearchResponse } from "@/features/products/types";
 import { Pager } from "@khinemyaezin/seller-ui/components/pager";
 import {
   Table,
@@ -36,15 +36,15 @@ export type ProductTableProps = {
   onLifecycleEvent?: (event: ProductLifecycleEvent) => void;
 };
 
-function transformToProducts(data?: GetFeaturedProductResponse): FeatureProduct[] {
-  return data?._embedded ? data._embedded.productSummaryResponseList.map((product) => ({
-    productId: product.id,
-    name: product.name,
+function transformToProducts(data?: ProductSearchResponse): FeatureProduct[] {
+  return data?._embedded?.productSearchResponseList?.map((product) => ({
+    productId: product.productId,
+    name: product.productName,
     status: product.status,
     slug: product.slug,
     categoryName: product.categoryName,
     _links: product._links
-  })) : [];
+  })) ?? [];
 }
 
 export default function ProductTable({ link, filter, onPageChange, onLifecycleEvent }: ProductTableProps) {
