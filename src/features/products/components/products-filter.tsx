@@ -11,36 +11,22 @@ const DEFAULT_SIZE = 5;
 const FIELDS: FilterField[] = [
   {
     type: "input",
-    name: "productName",
-    label: "Search",
+    name: "query",
+    label: "",
     placeholder: "Search products",
     debounceMs: 300,
   },
-  {
-    type: "select",
-    name: "productStatus",
-    label: "Status",
-    placeholder: "Status",
-    groupLabel: "Product Status",
-    options: [
-      { label: "All", value: ALL },
-      ...PRODUCT_STATUS.map((status) => ({
-        label: formatProductStatus(status),
-        value: status,
-      })),
-    ],
-  },
-  {
-    type: "select",
-    name: "size",
-    label: "Rows",
-    placeholder: "Page size",
-    options: PAGE_SIZES.map((size) => ({ label: String(size), value: String(size) })),
-  },
+   {
+      type: "select",
+      name: "size",
+      label: "",
+      placeholder: "Page size",
+      options: PAGE_SIZES.map((size) => ({ label: String(size), value: String(size) })),
+    },
 ];
 
 const DEFAULT_VALUES: FilterValues = {
-  productName: "",
+  query: "",
   productStatus: ALL,
   size: String(DEFAULT_SIZE),
 };
@@ -52,11 +38,11 @@ export type ProductsFilterProps = {
 export default function ProductsFilter({ onChange }: ProductsFilterProps) {
   const handleChange = useCallback(
     (values: FilterValues) => {
-      const productName = typeof values.productName === "string" ? values.productName.trim() : "";
+      const query = typeof values.query === "string" ? values.query.trim() : "";
       const productStatus = values.productStatus === ALL ? null : (values.productStatus as ProductStatus);
 
       onChange({
-        productName,
+        query,
         productStatus,
         size: Number(values.size ?? DEFAULT_SIZE),
       });
@@ -69,11 +55,7 @@ export default function ProductsFilter({ onChange }: ProductsFilterProps) {
       fields={FIELDS}
       defaultValues={DEFAULT_VALUES}
       onChange={handleChange}
-      className="lg:grid-cols-[minmax(16rem,1fr)_minmax(10rem,13rem)_minmax(8rem,10rem)]"
+      className="flex flex-wrap gap-3"
     />
   );
-}
-
-function formatProductStatus(status: ProductStatus) {
-  return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
 }

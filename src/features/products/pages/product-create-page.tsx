@@ -25,7 +25,7 @@ export default function NewProductPage() {
     };
 
     return (
-        <div className="container mx-auto max-w-xl p-6">
+        <div className="container mx-auto max-w-3xl p-6">
             <Header
                 title="Add Product"
                 description="Add a new product to your seller catalog."

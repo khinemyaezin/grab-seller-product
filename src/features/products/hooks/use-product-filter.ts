@@ -2,13 +2,13 @@ import { useCallback, useState } from "react";
 import type { ProductFilterFormValue } from "@/features/products/types";
 
 const DEFAULT_FILTER: ProductFilterFormValue = {
-  productName: "",
+  query: "",
   productStatus: null,
   page: 0,
   size: 5,
 };
 
-export type ProductSearchCriteria = Pick<ProductFilterFormValue, "productName" | "productStatus" | "size">;
+export type ProductSearchCriteria = Pick<ProductFilterFormValue, "query" | "productStatus" | "size">;
 
 export function useProductFilter(initial?: Partial<ProductFilterFormValue>) {
   const [filter, setFilter] = useState<ProductFilterFormValue>({ ...DEFAULT_FILTER, ...initial });

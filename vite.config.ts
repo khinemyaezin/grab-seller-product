@@ -25,11 +25,12 @@ export default defineConfig(({ mode }) => {
         },
         exposes: { "./Routes": "./src/app/AppRoutes.tsx" },
         shared: {
-          react: { singleton: true, requiredVersion: "19.2.4" },
+          "react": { singleton: true, requiredVersion: "19.2.4" },
           "react-dom": { singleton: true, requiredVersion: "19.2.4" },
           "react-router": { singleton: true, requiredVersion: "7.18.0" },
           "@tanstack/react-query": { singleton: true, requiredVersion: "5.99.2" },
           "@khinemyaezin/seller-api": { singleton: true },
+          "@khinemyaezin/seller-ui": { singleton: true }
         },
       }),
     ],

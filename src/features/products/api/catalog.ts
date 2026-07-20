@@ -2,8 +2,6 @@ import type {
   CategoryLeavesResult,
   CreateProductRequest,
   GetFullProductResponse,
-  GetFeaturedProductRequest,
-  GetFeaturedProductResponse,
   GetVariationOptionResult,
   GetVariationTypeResult,
   UpdateProductRequest,
@@ -12,6 +10,8 @@ import type {
   VariationMatrixResponse,
   DeleteProductResponse,
   ProductModerationResponse,
+  ProductSearchRequest,
+  ProductSearchResponse,
 } from "@/features/products/types";
 import { api, resolveUrlTemplate } from "@khinemyaezin/seller-api";
 import type { HateoasLink } from "@khinemyaezin/seller-api";
@@ -32,11 +32,10 @@ export const catalogService = {
   getVariationOption: (link: HateoasLink, headers?: Record<string, string>) =>
     api.followLink<GetVariationOptionResult>(link, "GET", undefined, undefined, headers),
 
-  searchProducts: (link: HateoasLink, request: GetFeaturedProductRequest, headers?: Record<string, string>) => {
-    const { page, size, ...restFilter } = request;
+  searchProducts: (link: HateoasLink, request: ProductSearchRequest, headers?: Record<string, string>) => {
+    const { page, size, ...body } = request;
     const params = { page: String(page), size: String(size) };
-    const resolvedLink = resolveUrlTemplate({}, link);
-    return api.followLink<GetFeaturedProductResponse>(resolvedLink, "POST", restFilter, params, headers);
+    return api.followLink<ProductSearchResponse>(link, "POST", body, params, headers);
   },
 
   getFullProduct: (link: HateoasLink, headers?: Record<string, string>) =>
